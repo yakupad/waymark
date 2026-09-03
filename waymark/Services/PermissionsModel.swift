@@ -22,6 +22,10 @@ final class PermissionsModel {
     /// Shown as a dismissible card on the active-trip screen (spec §11 step 4).
     var showBackgroundUpgradeCard = false
 
+    /// Screenshot / demo mode (`-waymarkScreen …`): skip the system prompts so the
+    /// captures aren't covered by an alert.
+    var demoMode = CommandLine.arguments.contains("-waymarkScreen")
+
     init(env: AppEnvironment, defaults: UserDefaults = .standard) {
         self.env = env
         self.defaults = defaults
@@ -33,6 +37,7 @@ final class PermissionsModel {
 
     /// Called from `LiveTripController.start()`.
     func onTripStarted() {
+        guard !demoMode else { return }
         // 1. Location — "When In Use" if still undetermined (system shows our string).
         if locationStatus == .notDetermined {
             env.locationProvider.requestAuthorization()
