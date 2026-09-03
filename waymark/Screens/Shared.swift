@@ -31,6 +31,28 @@ struct RouteMap: View {
                 MapPolyline(coordinates: coords).stroke(.white, lineWidth: 8)
                 MapPolyline(coordinates: coords).stroke(Color.signBlue, lineWidth: 5)
             }
+
+            // Endpoints — a hollow "start here" ring and, on a finished route,
+            // a filled "end here" pin. Without these the bare line reads as noise.
+            if let start = endpoints?.start {
+                Annotation("", coordinate: start, anchor: .center) {
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 15, height: 15)
+                        .overlay(Circle().strokeBorder(Color.signBlue, lineWidth: 4))
+                        .shadow(radius: 1.5, y: 1)
+                }
+            }
+            if follow == nil, let end = endpoints?.end {
+                Annotation("", coordinate: end, anchor: .bottom) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 26))
+                        .foregroundStyle(Color.signBlue)
+                        .background(Circle().fill(.white).padding(3))
+                        .shadow(radius: 2, y: 1)
+                }
+            }
+
             if let follow {
                 Annotation("", coordinate: CLLocationCoordinate2D(
                     latitude: follow.latitude, longitude: follow.longitude
@@ -75,6 +97,18 @@ struct RouteMap: View {
     private struct Coord: Equatable {
         let lat: Double, lon: Double
         init(_ c: Coordinate) { lat = c.latitude; lon = c.longitude }
+    }
+
+    /// First and last coordinates of the whole trace, for the start / end markers.
+    private var endpoints: (start: CLLocationCoordinate2D, end: CLLocationCoordinate2D)? {
+        let points = route.segments.flatMap(\.points)
+        guard let first = points.first, let last = points.last,
+              Haversine.distance(first, last) > 1
+        else { return nil }
+        return (
+            CLLocationCoordinate2D(latitude: first.latitude, longitude: first.longitude),
+            CLLocationCoordinate2D(latitude: last.latitude, longitude: last.longitude)
+        )
     }
 
     /// Compass bearing (degrees clockwise from north) of the last leg of the route,
