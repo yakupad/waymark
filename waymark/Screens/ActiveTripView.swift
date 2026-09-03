@@ -10,24 +10,23 @@ import DesignSystem
 struct ActiveTripView: View {
     let model: AppModel
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private var live: LiveTripController { model.liveTrip }
+    /// Landscape on a phone — very short. Split into two columns instead of a
+    /// stack that can't fit and can't scroll.
+    private var isLandscapePhone: Bool {
+        #if DEBUG
+        if CommandLine.arguments.contains("-forceWideLayout") { return true }
+        #endif
+        return verticalSizeClass == .compact
+    }
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: Spacing.md) {
-                if model.permissions.showBackgroundUpgradeCard {
-                    backgroundUpgradeCard
-                }
-                header
-                    .padding(.horizontal, Spacing.md)
-                RouteMap(route: live.route, follow: live.currentCoordinate)
-                    .frame(height: 190)
-                    .clipShape(.rect(cornerRadius: Radius.md))
-                    .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(.quaternary, lineWidth: 1))
-                    .padding(.horizontal, Spacing.md)
-                passedList
+            Group {
+                if isLandscapePhone { landscapeLayout } else { portraitLayout }
             }
-            .padding(.top, Spacing.sm)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Active trip")
             .navigationBarTitleDisplayMode(.inline)
@@ -37,6 +36,49 @@ struct ActiveTripView: View {
                 }
             }
         }
+    }
+
+    private var portraitLayout: some View {
+        VStack(spacing: Spacing.md) {
+            if model.permissions.showBackgroundUpgradeCard {
+                backgroundUpgradeCard
+            }
+            header.padding(.horizontal, Spacing.md)
+            mapView.padding(.horizontal, Spacing.md)
+            passedList
+        }
+        .padding(.top, Spacing.sm)
+    }
+
+    private var landscapeLayout: some View {
+        HStack(alignment: .top, spacing: 0) {
+            VStack(spacing: Spacing.md) {
+                if model.permissions.showBackgroundUpgradeCard {
+                    backgroundUpgradeCard
+                }
+                header
+                routeMap   // no fixed height — fills the rest of the column
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+
+            Divider()
+
+            passedList
+                .frame(maxWidth: .infinity)
+                .padding(.top, Spacing.sm)
+        }
+    }
+
+    private var mapView: some View {
+        routeMap.frame(height: 190)
+    }
+
+    private var routeMap: some View {
+        RouteMap(route: live.route, follow: live.currentCoordinate)
+            .frame(maxWidth: .infinity)
+            .clipShape(.rect(cornerRadius: Radius.md))
+            .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(.quaternary, lineWidth: 1))
     }
 
     private var backgroundUpgradeCard: some View {
