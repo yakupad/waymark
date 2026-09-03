@@ -177,6 +177,15 @@ device is not collected data.
 
 ## 4. Build & signing
 
+> **Use the released Xcode, not a beta** — App Store Review rejects beta-Xcode
+> builds ("This build is using a beta version of Xcode"). On this mac that's
+> `/Applications/Xcode.app` (26.3), not `/Applications/Xcode-beta.app` (27.0).
+> `xcode-select -p` currently points at the beta — switch it
+> (`sudo xcode-select -s /Applications/Xcode.app`) or just open `Xcode.app` to
+> archive. The project format was set to `objectVersion 77` so 26.3 can open it;
+> **do not reopen the project in Xcode-beta** (it rewrites the format to 110).
+
+
 | Setting | Value |
 |---|---|
 | Marketing version | `1.0` |
