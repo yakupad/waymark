@@ -1,0 +1,52 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "waymark"
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waymark uses your location in the background so it can tell you when you enter a new place while your screen is off. Your location never leaves your device."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama arka plandayken de yeni bir şehre veya ilçeye girdiğinizde sizi bilgilendirebilmemiz için konumunuza ihtiyaç duyuyoruz. Konum bilginiz cihazınızdan hiçbir yere gönderilmez."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waymark uses your location to show which provinces and districts you pass through on a trip."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yolculuğunuz sırasında hangi il ve ilçelerden geçtiğinizi gösterebilmek için konumunuza ihtiyaç duyuyoruz."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
