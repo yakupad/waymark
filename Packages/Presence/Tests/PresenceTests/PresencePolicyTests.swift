@@ -40,7 +40,7 @@ struct PresencePolicyTests {
         #expect(PresencePolicy(sensitivity: .settlement).routing(for: event(settlementRef(9))).sendsPush)
     }
 
-    @Test func `Default sensitivity is tier1`() {
-        #expect(PresencePolicy().sensitivity == .tier1)
+    @Test func `Default sensitivity is tier2`() {
+        #expect(PresencePolicy().sensitivity == .tier2)
     }
 }

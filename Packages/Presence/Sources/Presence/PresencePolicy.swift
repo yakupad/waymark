@@ -9,8 +9,8 @@ import Foundation
 import GeoData
 import LocationEngine
 
-/// How much the user wants to be told (spec 8.1). Default is `.tier1` — 4-5 pushes on
-/// the first trip, not 40.
+/// How much the user wants to be told (spec 8.1). Default is `.tier2` — a notification
+/// for each new province and district, not for every village.
 public enum NotificationSensitivity: Int, Sendable, CaseIterable, Comparable, Codable {
     /// Provinces only (Turkey: il).
     case tier1 = 1
@@ -36,7 +36,7 @@ public struct SurfaceRouting: Sendable, Equatable {
 public struct PresencePolicy: Sendable {
     public var sensitivity: NotificationSensitivity
 
-    public init(sensitivity: NotificationSensitivity = .tier1) {
+    public init(sensitivity: NotificationSensitivity = .tier2) {
         self.sensitivity = sensitivity
     }
 

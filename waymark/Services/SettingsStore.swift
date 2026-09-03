@@ -70,7 +70,7 @@ final class SettingsStore {
 
     private static func readSensitivity(_ defaults: UserDefaults) -> NotificationSensitivity {
         let raw = defaults.object(forKey: Keys.sensitivity) as? Int
-        return raw.flatMap(NotificationSensitivity.init(rawValue:)) ?? .tier1
+        return raw.flatMap(NotificationSensitivity.init(rawValue:)) ?? .tier2
     }
 
     private enum Keys {

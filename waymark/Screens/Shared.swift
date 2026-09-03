@@ -35,13 +35,20 @@ struct RouteMap: View {
                 Annotation("", coordinate: CLLocationCoordinate2D(
                     latitude: follow.latitude, longitude: follow.longitude
                 )) {
-                    Image(systemName: "location.north.fill")
-                        .font(.system(size: 15, weight: .black))
-                        .foregroundStyle(.white)
-                        .padding(7)
-                        .background(Color.signBlue, in: Circle())
-                        .overlay(Circle().stroke(.white, lineWidth: 2.5))
-                        .shadow(radius: 2, y: 1)
+                    Group {
+                        if let course {
+                            Image(systemName: "location.north.fill")
+                                .rotationEffect(.degrees(course))
+                        } else {
+                            Circle().fill(.white).frame(width: 9, height: 9)
+                        }
+                    }
+                    .font(.system(size: 15, weight: .black))
+                    .foregroundStyle(.white)
+                    .padding(7)
+                    .background(Color.signBlue, in: Circle())
+                    .overlay(Circle().stroke(.white, lineWidth: 2.5))
+                    .shadow(radius: 2, y: 1)
                 }
             }
         }
@@ -68,6 +75,45 @@ struct RouteMap: View {
     private struct Coord: Equatable {
         let lat: Double, lon: Double
         init(_ c: Coordinate) { lat = c.latitude; lon = c.longitude }
+    }
+
+    /// Compass bearing (degrees clockwise from north) of the last leg of the route,
+    /// so the marker points the way the traveller is actually heading. `nil` until
+    /// there are two distinct points to draw a line between.
+    private var course: Double? {
+        let points = route.segments.flatMap(\.points)
+        guard let end = points.last,
+              let start = points.reversed().first(where: { Haversine.distance($0, end) > 8 })
+        else { return nil }
+        let lat1 = start.latitude * .pi / 180
+        let lat2 = end.latitude * .pi / 180
+        let dLon = (end.longitude - start.longitude) * .pi / 180
+        let y = sin(dLon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        let deg = atan2(y, x) * 180 / .pi
+        return deg < 0 ? deg + 360 : deg
+    }
+}
+
+/// A compact "a journey from A to B" mark for list rows — an origin ring, a
+/// short run, and an arrival chevron. Deterministic and legible at any size,
+/// unlike a shrunk-down route trace (spec R10).
+struct JourneyGlyph: View {
+    var body: some View {
+        VStack(spacing: 3) {
+            Circle()
+                .strokeBorder(Color.signBlue, lineWidth: 2.5)
+                .frame(width: 9, height: 9)
+            Rectangle()
+                .fill(Color.signBlue)
+                .frame(width: 2.5, height: 14)
+            Image(systemName: "chevron.down")
+                .font(.system(size: 13, weight: .black))
+                .foregroundStyle(Color.signBlue)
+        }
+        .frame(width: 52, height: 52)
+        .background(Color.signBlue.opacity(0.07), in: .rect(cornerRadius: Radius.sm))
+        .overlay(RoundedRectangle(cornerRadius: Radius.sm).stroke(.quaternary, lineWidth: 1))
     }
 }
 
@@ -168,9 +214,7 @@ struct TripRowView: View {
 
     var body: some View {
         HStack(spacing: Spacing.md) {
-            if let route = item.route {
-                RoutePreviewThumbnail(tripID: item.id, route: route)
-            }
+            JourneyGlyph()
             MilestoneRow(title: item.title, subtitle: detail)
         }
     }

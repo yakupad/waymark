@@ -21,14 +21,16 @@ struct SettingsView: View {
 
         Form {
             Section {
-                Picker("Notification level", selection: $settings.sensitivity) {
-                    Text("Provinces").tag(NotificationSensitivity.tier1)
-                    Text("Districts").tag(NotificationSensitivity.tier2)
-                    Text("Settlements").tag(NotificationSensitivity.settlement)
+                Picker("Notify me about", selection: $settings.sensitivity) {
+                    Text("Provinces only").tag(NotificationSensitivity.tier1)
+                    Text("Provinces & districts").tag(NotificationSensitivity.tier2)
+                    Text("Every place").tag(NotificationSensitivity.settlement)
                 }
                 .onChange(of: settings.sensitivity) { _, new in
                     Task { await env.presence.setSensitivity(new) }
                 }
+            } header: {
+                Text("Notifications")
             } footer: {
                 Text(sensitivityWarning(settings.sensitivity))
             }
@@ -82,9 +84,12 @@ struct SettingsView: View {
 
     private func sensitivityWarning(_ sensitivity: NotificationSensitivity) -> LocalizedStringKey {
         switch sensitivity {
-        case .tier1: "About 4–5 notifications on an İstanbul–Ordu trip."
-        case .tier2: "About 35 notifications on an İstanbul–Ordu trip."
-        case .settlement: "Every village too — expect many notifications on a long drive."
+        case .tier1:
+            "A notification only when you cross into a new province — a handful on a long drive."
+        case .tier2:
+            "A notification for each new province and district. Recommended for most trips."
+        case .settlement:
+            "Also every village and town you pass — this can be a lot on a long drive."
         }
     }
 

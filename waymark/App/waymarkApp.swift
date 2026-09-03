@@ -62,6 +62,10 @@ struct AppRootView: View {
         guard let i = CommandLine.arguments.firstIndex(of: "-waymarkScreen"),
               i + 1 < CommandLine.arguments.count else { return }
         let screen = CommandLine.arguments[i + 1]
+        if screen == "settings" {
+            model.selectedTab = .settings
+            return
+        }
         model.startTrip()
         if screen == "summary" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 35) { model.endTrip() }

@@ -30,7 +30,6 @@ final class HistoryModel {
 
     func deleteAll() {
         try? env.tripStore.deleteAll()
-        RoutePreviewCache.shared.invalidateAll()
         reload()
     }
 
