@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Waymark synthetic fixture">
+  <trk><name>synthetic-boundary-oscillation</name><trkseg>
+      <trkpt lat="39.0" lon="32.7"><time>2026-01-01T08:00:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.7"><time>2026-01-01T08:15:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.7"><time>2026-01-01T08:30:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.7"><time>2026-01-01T08:45:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="33.003"><time>2026-01-01T09:00:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.997"><time>2026-01-01T09:15:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="33.003"><time>2026-01-01T09:30:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.997"><time>2026-01-01T09:45:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="33.003"><time>2026-01-01T10:00:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.997"><time>2026-01-01T10:15:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="33.003"><time>2026-01-01T10:30:00Z</time></trkpt>
+      <trkpt lat="39.0" lon="32.997"><time>2026-01-01T10:45:00Z</time></trkpt>
+  </trkseg></trk>
+</gpx>
