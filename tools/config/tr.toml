@@ -1,0 +1,71 @@
+# Waymark region pack configuration — Turkey (v1).
+#
+# This file is the ONLY place that carries region-specific knowledge. build_pack.py
+# and the waymark_pack package contain no hard-coded "TR", "il", "ilçe", 81 or 973
+# (spec decisions K6, K8). A new country is a new config file, not a code change.
+
+[region]
+iso_code       = "TR"
+name_local     = "Türkiye"
+name_en        = "Turkey"
+wikidata_id    = "Q43"
+pack_version   = 1
+data_date      = "2026-08-31"   # authoritative date of the source data; drives determinism
+
+[locale]
+# Passed to waymark_pack.match for Turkish-aware case folding (spec R6: the İ/ı trap).
+name_normalization = "tr_TR"
+
+# osm_admin_level -> tier mapping and the labels shown to the user (spec K6, schema 5.3
+# table tier_label). v1 has exactly two rows.
+[[tier]]
+tier             = 1
+osm_admin_level  = 4
+label_local      = "İl"
+label_en         = "Province"
+expected_count   = 81
+# tier-1 country filter: keep relations tagged ISO3166-2 = "TR-*". Exact, no geometry.
+# Bonus: the numeric part of the tag is the plaka code -> fills admin_code directly.
+iso3166_2_prefix = "TR-"
+
+[[tier]]
+tier             = 2
+osm_admin_level  = 6
+label_local      = "İlçe"
+label_en         = "District"
+expected_count   = 973
+# tier-2 country filter has no usable ISO tag (measured: 0/973 match). Units are assigned
+# to the tier-1 polygon they have MAXIMUM INTERSECTION AREA with (not centroid — crescent
+# shaped coastal districts have their centroid outside the polygon). Same pass drops
+# foreign units and sets parent_id. Intersection ratio < 0.5 is reported as suspicious.
+max_intersection_report_threshold = 0.5
+# Turkey creates/merges districts over time and not every boundary relation assembles;
+# the 2026 Geofabrik extract yields ~970. Allow a small drift from the 973 target.
+count_tolerance = 0.01
+
+[content]
+languages        = ["tr", "en"]
+# {lang} and {title} are substituted per request. Only tier 1-2 get summaries; villages
+# do not (spec İ4 + size budget).
+wikipedia_api    = "https://{lang}.wikipedia.org/api/rest_v1/page/summary/{title}"
+# If a language's coverage ratio falls below this, the report flags it (spec R13).
+min_coverage_warn = 0.40
+
+[population]
+# admin_unit.population_src value. v1 Turkey = TÜİK ADNKS. v2+ countries switch to wikidata.
+source = "tuik"
+year   = 2023
+
+[simplify]
+# shapely simplify(tolerance, preserve_topology=True). 0.001 deg ≈ 100 m (spec 5.2 step 4).
+tolerance_deg = 0.001
+
+[inputs]
+# Paths are resolved relative to the repo root. These files are NOT in the repo
+# (see tools/README.md for how to obtain them). Absent inputs -> use --fixture.
+osm_pbf       = "tools/data/turkey-latest.osm.pbf"
+tuik_csv      = "tools/data/tuik-adnks.csv"
+wikidata_json = "tools/data/wikidata-tr.json"
+
+[meta]
+osm_extract_date = "2026-08-31"

@@ -1,0 +1,10 @@
+# Waymark pack pipeline dependencies.
+# Config parsing uses tomllib from the stdlib (Python 3.11+), no dependency needed.
+
+shapely>=2.0        # polygon simplification, country filter intersection tests
+requests>=2.31      # Wikipedia REST summary fetching (optional at runtime)
+pytest>=8.0         # test suite
+
+# pyosmium is NOT required: extraction shells out to the `osmium` CLI
+# (`brew install osmium-tool`). Listed here for reference only.
+# pyosmium>=3.6
