@@ -5,8 +5,9 @@
 //  them to a Shortcuts personal automation ("when my car's Bluetooth connects →
 //  Start a Waymark trip", or a CarPlay / "when Maps opens" trigger). Spec §11.
 //
-//  Both run headless in the main app process (`.main`) because they touch the
-//  in-memory `LiveTripController`.
+//  Both run headless (`supportedModes: .background`). With no App Intents
+//  extension the system runs them in the main app process, where the in-memory
+//  `TripController` lives.
 
 import AppIntents
 import TripKit
@@ -18,7 +19,6 @@ struct StartTripIntent: AppIntent {
     )
 
     static var supportedModes: IntentModes { .background }
-    static var allowedExecutionTargets: IntentExecutionTargets { .main }
 
     @Dependency private var trips: TripController
 
@@ -37,7 +37,6 @@ struct EndTripIntent: AppIntent {
     )
 
     static var supportedModes: IntentModes { .background }
-    static var allowedExecutionTargets: IntentExecutionTargets { .main }
 
     @Dependency private var trips: TripController
 

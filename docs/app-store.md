@@ -181,7 +181,7 @@ device is not collected data.
 |---|---|
 | Marketing version | `1.0` |
 | Build | `1` (bump every upload) |
-| Deployment target | iOS 27.0 |
+| Deployment target | iOS 26.0 |
 | Device family | iPhone only (`TARGETED_DEVICE_FAMILY = 1`) |
 | Supported platforms | `iphoneos iphonesimulator` (no iPad / visionOS / Catalyst in v1) |
 | Widget extension | `WaymarkWidgets.appex` — embedded, bundle id `tr.com.yakupad.waymark.WaymarkWidgets` |

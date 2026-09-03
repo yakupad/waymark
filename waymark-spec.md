@@ -7,7 +7,7 @@
 > (2) kod üretimi sırasında bölüm bölüm beslenecek prompt seti (bkz. Bölüm 16).
 
 **Versiyon:** 0.10 — v1 kapsamı Türkiye, mimari global
-**Platform:** iOS 27.0+ (F1 kararı; v0.2'de 17.0 idi — bkz. Bölüm 17.2)
+**Platform:** iOS 26.0+ (SDK 27 ile derlenir; 2026-09-03'te 27.0'dan çekildi — bkz. Bölüm 17.2)
 **Dil:** Swift 6+ / SwiftUI (Xcode 27 toolchain)
 **Mimari:** MVVM-C
 **Kod ve commit dili:** İngilizce
@@ -1414,9 +1414,12 @@ Kod üretimine başlamadan önce netleşmesi gerekenler:
 
 1. ~~Ürün adı~~ — **Waymark**. App Store isim müsaitliği ve marka çakışması hâlâ
    doğrulanmalı; çakışma çıkarsa alternatifler: Milepost, Crossing, Passage.
-2. ~~Minimum iOS sürümü~~ — **27.0** (güncellendi). Xcode 27 projesi bu hedefle
-   oluşturuldu; bugün başlayan v1 için Observation, SwiftData, olgun Live Activity
-   ve SDK 27 API'leri gerekçe. (Spec v0.2 metni 17.0 diyordu; F1 kararıyla 27.0'a çekildi.)
+2. ~~Minimum iOS sürümü~~ — **26.0** (2026-09-03 güncellendi; F1'de 27.0 idi).
+   SDK 27 ile derlenir, hedef 26.0. Bir sürüm geriye çekildi çünkü v1 için kurulu
+   cihaz tabanı önemli; 26.0'da kaybedilen tek API `IntentExecutionTargets`
+   (App Intent'lerden `allowedExecutionTargets` kaldırıldı — App Intents extension
+   olmadığı için zaten no-op'tu). Observation, SwiftData, `IntentModes`, Live
+   Activity hepsi ≤ 26.0. (Spec v0.2 metni 17.0 diyordu.)
 3. ~~SQLite kütüphanesi~~ — **GRDB** (F1 kararı). Olgun R\*Tree desteği, `Sendable`/
    concurrency uyumu, SPM ile tek temiz bağımlılık. F2'de `GeoData` bunu kullanır.
 4. **Ücretlendirme** — Ücretsiz mi, tek seferlik satın alma mı, abonelik mi?
