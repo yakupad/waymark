@@ -1,3 +1,7 @@
+---
+title: Support
+---
+
 # Waymark — Support
 
 Waymark tells you the name, population and a line of history for every province,
@@ -44,7 +48,7 @@ stores is on your device and goes with it.
 Email: **<support-email>**
 We usually reply within a few days.
 
-Privacy policy: **https://\<host\>/waymark/privacy**
+Privacy policy: **https://yakupad.github.io/waymark/privacy/**
 
 ---
 
@@ -96,4 +100,4 @@ sakladığı her şey cihazınızdadır ve onunla birlikte gider.
 E-posta: **<support-email>**
 Genellikle birkaç gün içinde yanıt veriyoruz.
 
-Gizlilik politikası: **https://\<host\>/waymark/privacy**
+Gizlilik politikası: **https://yakupad.github.io/waymark/privacy/**

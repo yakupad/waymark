@@ -1,0 +1,10 @@
+title: Waymark
+description: >-
+  Notice the towns you pass. An offline travel companion for intercity drives in
+  Turkey — your location never leaves your phone.
+theme: jekyll-theme-minimal
+permalink: /:name/
+exclude:
+  - app-store.md
+  - app-store/
+  - README.md

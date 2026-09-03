@@ -132,12 +132,15 @@ First release. Waymark tells you the name, population and a line of history for 
 
 ### 2.6 Support URL (required)  &  Marketing URL (optional)
 
-- **Support URL:** `https://<host>/waymark/support` — host `docs/support.md` (see §6)
-- **Marketing URL:** same host root, or leave blank for v1
-- **Privacy Policy URL (required):** `https://<host>/waymark/privacy` — host `docs/privacy-policy.md`
+Served by GitHub Pages from `docs/` on `main` (see §6):
 
-Cheapest hosting: a GitHub repo with **Pages** enabled (`docs/` folder as the
-source) serves both files as HTML for free. Or any static host.
+- **Support URL:** `https://yakupad.github.io/waymark/support/`
+- **Marketing URL:** `https://yakupad.github.io/waymark/` (or leave blank for v1)
+- **Privacy Policy URL (required):** `https://yakupad.github.io/waymark/privacy/`
+
+> The support page shows a placeholder `<support-email>` — set a real contact
+> address before submitting (App Review checks the support URL is reachable and
+> has a way to contact you).
 
 ### 2.7 Copyright
 `2026 Yakup Ad`

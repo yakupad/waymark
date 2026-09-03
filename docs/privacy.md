@@ -1,3 +1,7 @@
+---
+title: Privacy Policy
+---
+
 # Waymark — Privacy Policy
 
 _Last updated: 3 September 2026_
