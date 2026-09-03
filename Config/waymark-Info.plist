@@ -10,5 +10,7 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSMotionUsageDescription</key>
+	<string>Waymark reads motion activity on your device to notice when you're driving or cycling, so it can remind you to start a trip. It's never uploaded.</string>
 </dict>
 </plist>

@@ -23,7 +23,14 @@ final class SettingsStore {
         self.quietStartHour = defaults.object(forKey: Keys.quietStart) as? Int ?? 23
         self.quietEndHour = defaults.object(forKey: Keys.quietEnd) as? Int ?? 7
         self.shareTrimMeters = defaults.object(forKey: Keys.trim) as? Double ?? 1_000
+        self.travelReminders = defaults.bool(forKey: Keys.travelReminders)
         self.tuning = .default
+    }
+
+    /// Opt-in: nudge the user to start a trip when they're clearly on the road
+    /// (spec §11 F10b). Off by default so the motion prompt only appears on request.
+    var travelReminders: Bool {
+        didSet { defaults.set(travelReminders, forKey: Keys.travelReminders) }
     }
 
     var sensitivity: NotificationSensitivity {
@@ -79,5 +86,6 @@ final class SettingsStore {
         static let quietStart = "waymark.settings.quietStartHour"
         static let quietEnd = "waymark.settings.quietEndHour"
         static let trim = "waymark.settings.shareTrimMeters"
+        static let travelReminders = "waymark.settings.travelReminders"
     }
 }

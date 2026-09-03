@@ -58,6 +58,20 @@ struct SettingsView: View {
             }
 
             Section {
+                Toggle("Remind me to start a trip", isOn: $settings.travelReminders)
+                    .onChange(of: settings.travelReminders) { _, on in
+                        TravelNudge.shared.setEnabled(on)
+                    }
+                if settings.travelReminders, TravelNudge.shared.authorization == .denied {
+                    Text("Motion access is off. Turn it on in iOS Settings › Waymark › Motion & Fitness.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } footer: {
+                Text("When you've been driving or cycling for a few minutes without a trip running, Waymark sends one reminder. Uses motion data on your device only.")
+            }
+
+            Section {
                 Text("Waymark adds **Start a Trip** and **End Trip** actions to the Shortcuts app. Wire them to a personal automation so a trip starts on its own:", comment: "Auto-start help intro")
                     .font(.footnote)
                 Label("Shortcuts → Automation → New", systemImage: "1.circle")

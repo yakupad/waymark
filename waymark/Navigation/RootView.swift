@@ -9,6 +9,7 @@ import SwiftUI
 struct RootView: View {
     @Bindable var model: AppModel
     @State private var trips = TripController.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         TabView(selection: $model.selectedTab) {
@@ -41,6 +42,10 @@ struct RootView: View {
                     model: model
                 )
             }
+        }
+        .task { TravelNudge.shared.setEnabled(model.env.settings.travelReminders) }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { TravelNudge.shared.appBecameActive() }
         }
     }
 }

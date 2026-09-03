@@ -56,6 +56,7 @@ final class TripController {
         let finished = FinishedTrip(summary: summary, tripID: live.finishedTripID)
         isActiveTripPresented = false
         justFinished = finished
+        TravelNudge.shared.noteTripEnded()
         return finished
     }
 }

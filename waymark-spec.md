@@ -918,9 +918,14 @@ Yolculuk elle başlatılır, ama kullanıcı bunu unutabilir (otobüs, bisiklet 
    CarPlay, ya da "Harita'yı açtığında" → Yolculuğa Başla. Hiç UI olmadan, arka planda
    çalışır; zaten süren yolculuk varken idempotent (no-op). Ayarlar'da adım adım tarif +
    "Kısayolları Aç" butonu.
-2. **Hareket-tabanlı dürtme** (F11) — `CMMotionActivityManager` → sürekli
-   `.automotive` / `.cycling` + aktif yolculuk yok → saatte bir "yolda mısın?" yerel
-   bildirimi. Otomasyon kurmayan kullanıcı için ağ.
+2. **Hareket-tabanlı dürtme** (F10b — **TAMAM**) — Ayarlar'da opt-in "Yolculuk
+   başlatmayı hatırlat" (varsayılan kapalı, açınca `NSMotionUsageDescription`
+   sorulur). `CMMotionActivityManager` → sürekli `.automotive` / `.cycling` + aktif
+   yolculuk yok → tek bir "Yolda mısın?" yerel bildirimi (aksiyon: Yolculuğa Başla).
+   Saf karar mantığı `LocationEngine.TravelRun` + `TravelNudgePolicy` (11 test).
+   `TravelNudge` servisi CoreMotion'ı sarar, `checkRecentHistory()` uygulama öne
+   gelince süspansiyon boşluğunu tarar. Cooldown 90 dk, yolculuk-sonrası sessizlik
+   30 dk. Otomasyon kurmayan kullanıcı için ağ.
 3. **Tam otomatik tespit** — v2 (bkz. Bölüm 3): SLC + geofence + otomotiv/bisiklet
    sinyali → yolculuğu kendi başlatır.
 
@@ -1091,7 +1096,7 @@ R1 gerçekleşirse (ilçe verisi yetersizse) proje mimarisi değişir. Bunu üç
 | ~~F7~~ | ~~Harita çizimi, yolculuk özeti, paylaşım görseli~~ | **TAMAM** — `MKMapSnapshotter` paylaşım görseli + önizleme önbelleği simülatörde doğrulandı |
 | ~~F8~~ | ~~Debug menüsü, ayarlar, atıf ekranı, gizlilik dosyası~~ | **TAMAM** — privacy manifest, Widget Extension, App Store taslağı; app + widget Release derleniyor |
 | ~~F10a~~ | ~~App Intent'ler + Kısayollar (otomatik başlatma)~~ | **TAMAM** — `StartTripIntent`/`EndTripIntent`, `WaymarkShortcuts`, `TripController` süreç-geneli singleton, Ayarlar tarifi |
-| **F10b** | Hareket-tabanlı dürtme (`CMMotionActivityManager`) | v1.1 |
+| ~~F10b~~ | ~~Hareket-tabanlı dürtme (`CMMotionActivityManager`)~~ | **TAMAM** — opt-in Ayarlar toggle, `TravelRun`/`TravelNudgePolicy` (11 test), `NotificationRouter` aksiyon işleyici |
 | **F9** | Saha testi, parametre ayarı, App Store | v1.0 |
 
 F2 ve F3 projenin en riskli ve en değerli kısımlarıdır. Zamanın çoğu oraya ayrılmalıdır.

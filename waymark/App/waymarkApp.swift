@@ -14,6 +14,7 @@ struct waymarkApp: App {
         // process launch, including the cold, headless launches a Shortcuts
         // automation triggers, before any intent can resolve `@Dependency`.
         AppDependencyManager.shared.add(dependency: TripController.shared)
+        NotificationRouter.shared.register()
     }
 
     var body: some Scene {

@@ -157,10 +157,16 @@ Answer: **"No, we do not collect data from this app."**
 Rationale, matching `waymark/Resources/PrivacyInfo.xcprivacy`:
 - `NSPrivacyTracking` = false, no tracking domains.
 - `NSPrivacyCollectedDataTypes` = empty. Location is processed on-device only and
-  never leaves it; trip history is stored only in the app's local SwiftData store.
-  Under Apple's definition this is **not** "collection".
+  never leaves it; trip history is stored only in the app's local SwiftData store;
+  motion activity (opt-in "Remind me to start a trip") is read on-device only.
+  Under Apple's definition none of this is "collection".
 - `NSPrivacyAccessedAPITypes`: `NSPrivacyAccessedAPICategoryUserDefaults`, reason
-  `CA92.1` (app's own settings).
+  `CA92.1` (app's own settings). CoreMotion activity is permission-gated, not a
+  Required-Reason API, so it needs no manifest entry.
+
+Permission strings needed (all in `InfoPlist.xcstrings`, en + tr):
+`NSLocationWhenInUseUsageDescription`,
+`NSLocationAlwaysAndWhenInUseUsageDescription`, `NSMotionUsageDescription`.
 
 If App Review pushes back on "not collected" because of the `location`
 background mode, the honest answer is still *Data Not Collected* — cite the

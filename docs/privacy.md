@@ -32,6 +32,14 @@ an offline map database bundled inside the app.
 - You can revoke location access at any time in iOS Settings › Privacy &
   Security › Location Services › Waymark.
 
+## Motion & Fitness (optional)
+
+If you turn on "Remind me to start a trip", Waymark reads your device's motion
+activity to tell when you're driving or cycling, so it can send one reminder to
+start a trip. This reading happens entirely on your iPhone and is never
+transmitted anywhere. The feature is off until you enable it, and you can revoke
+access in iOS Settings › Waymark › Motion & Fitness.
+
 ## Trip history
 
 When you record a trip, its route line and the list of places you passed are
@@ -119,6 +127,14 @@ bölgede (il, ilçe, kasaba) olduğunuzu belirlemek.
   Reddedip uygulamayı açıkken kullanmaya devam edebilirsiniz.
 - Konum erişimini istediğiniz zaman iOS Ayarlar › Gizlilik ve Güvenlik › Konum
   Servisleri › Waymark üzerinden iptal edebilirsiniz.
+
+## Hareket ve Fitness (isteğe bağlı)
+
+"Yolculuk başlatmayı hatırlat"ı açarsanız, Waymark araç kullandığınızı veya
+bisiklete bindiğinizi anlamak için cihazınızın hareket verisini okur ve size bir
+kez yolculuk başlatma hatırlatması gönderir. Bu okuma tamamen iPhone'unuzda olur
+ve hiçbir yere iletilmez. Özellik siz açana kadar kapalıdır; erişimi iOS Ayarlar
+› Waymark › Hareket ve Fitness'tan iptal edebilirsiniz.
 
 ## Yolculuk geçmişi
 
