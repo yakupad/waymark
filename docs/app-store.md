@@ -249,19 +249,31 @@ Not applicable — the app has no accounts or login.
 
 ## 6. Screenshots
 
-**Required:** at least one 6.9" iPhone screenshot (1320 × 2868 px, portrait).
-Apple up-scales 6.9" to fill the 6.5"/6.7" slots, so one set is enough.
+App Store Connect has a **separate upload slot per device size**. Put each set in
+the matching section — a 6.9" image rejected in the 6.5" slot just means wrong
+section, not a bad file.
 
-Delivered in `docs/app-store/screenshots/`, framed, for both locales:
+| Section in App Store Connect | Size (portrait) | Folder |
+|---|---|---|
+| **6.9″ Display** (primary — required) | 1320 × 2868 | `{en,tr}/` |
+| 6.5″ Display (optional) | 1284 × 2778 | `{en,tr}-6.5/` |
+
+Uploading only the 6.9″ set is enough — Apple down-scales it for smaller devices.
+The 6.5″ folder is a convenience copy (`sips -z 2778 1284`) for when Connect
+insists on that section.
 
 | File | Screen |
 |---|---|
-| `{en,tr}/*-home.png` | Home — start button, current place, recent trips |
-| `{en,tr}/*-active.png` | Active trip — direction panel, live map, places passed |
-| `{en,tr}/*-summary.png` | Trip summary — route, stats, highlights, timeline |
-| `{en,tr}/*-place.png` | Place detail — population, area, Wikipedia summary |
+| `*-home.png` | Home — start button, current place, recent trips |
+| `*-active.png` | Active trip — direction panel, live map, places passed |
+| `*-summary.png` | Trip summary — route, stats, highlights, timeline |
+| `*-place.png` | Place detail — population, area, Wikipedia summary |
 
 Raw (unframed) device captures are in `screenshots/raw/`.
+
+> The current framed set predates the province plate badge + full "Mahalle, İlçe,
+> Şehir" hierarchy. Not blocking (screenshots update without a review), but retake
+> them during the F9 device pass.
 
 **Optional extras** (grab on a real device during field testing): Settings,
 a real lock-screen Live Activity.
