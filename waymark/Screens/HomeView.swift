@@ -66,6 +66,7 @@ struct HomeView: View {
         }
         .navigationTitle("Waymark")
         .background(Color(.systemGroupedBackground))
+        .scrollContentBackground(.hidden)
         .onAppear {
             home.reload()
             home.resolveLastKnown()
@@ -101,14 +102,22 @@ struct HomeView: View {
             model.homePath.append(.place(place.ref))
         } label: {
             Card {
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text("Near here", comment: "Header of the current-location card")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(place.nameLocal)
-                        .font(.placeTitle)
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    HStack(spacing: Spacing.sm) {
+                        Image(systemName: "location.north.fill")
+                            .font(.system(size: 11, weight: .black))
+                            .foregroundStyle(Color.signBlue)
+                        Text("Near here", comment: "Header of the current-location card")
+                            .font(.signLabel).signCaps()
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        TierShield(place.tierLabel)
+                    }
+                    Text(place.nameLocal).font(.placeTitle)
                     if let parent = place.parentName {
-                        Text(parent).foregroundStyle(.secondary)
+                        Text(parent)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -120,8 +129,7 @@ struct HomeView: View {
     private var recentSection: some View {
         if !home.recentTrips.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text("Recent trips", comment: "Section header on the home screen")
-                    .font(.headline)
+                SignHeader("Recent trips")
                 ForEach(home.recentTrips) { trip in
                     Button {
                         model.homePath.append(.tripSummary(trip.id))

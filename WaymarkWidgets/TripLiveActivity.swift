@@ -62,19 +62,22 @@ private struct LockScreenView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+                Image(systemName: "location.north.fill")
+                    .font(.system(size: 13, weight: .black))
                 Text(state.headline)
-                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .font(.system(size: 22, weight: .black))
                     .lineLimit(1)
                 Spacer()
                 if let population = state.population {
                     Text("\(population, format: .number)")
-                        .font(.callout.monospacedDigit().weight(.semibold))
+                        .font(.system(size: 15, weight: .heavy).monospacedDigit())
                 }
             }
             Text(state.hierarchy)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.8))
+                .textCase(.uppercase)
                 .lineLimit(1)
             Divider().opacity(0.4)
             TripCountChips(state: state)

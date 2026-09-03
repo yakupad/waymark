@@ -48,7 +48,7 @@ struct PlaceDetailView: View {
 
     private func content(_ place: Place) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.md) {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
                 heading(place)
                 metrics(place)
                 if let article = place.article {
@@ -58,23 +58,32 @@ struct PlaceDetailView: View {
             }
             .padding(Spacing.md)
         }
+        .background(Color(.systemGroupedBackground))
+        .scrollContentBackground(.hidden)
     }
 
     private func heading(_ place: Place) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(place.nameLocal).font(.placeTitle)
-            if let localized = place.nameLocalized, localized != place.nameLocal {
-                Text(localized).foregroundStyle(.secondary)
-            }
-            HStack(spacing: Spacing.xs) {
-                Text(place.tierLabel)
-                if let parent = place.parentName {
-                    Text(verbatim: "·")
-                    Text(parent)
+        SignPanel {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                HStack {
+                    if let parent = place.parentName {
+                        Text(parent)
+                            .font(.signLabel).signCaps()
+                            .foregroundStyle(.white.opacity(0.9))
+                    }
+                    Spacer()
+                    TierShield(place.tierLabel, onDark: true)
+                }
+                Text(place.nameLocal)
+                    .font(.placeHeadline)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(2)
+                if let localized = place.nameLocalized, localized != place.nameLocal {
+                    Text(localized)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.8))
                 }
             }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
         }
     }
 

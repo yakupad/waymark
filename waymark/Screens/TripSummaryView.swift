@@ -103,6 +103,7 @@ struct TripSummaryView: View {
                     RouteMap(route: summaryModel.route)
                         .frame(height: 220)
                         .clipShape(.rect(cornerRadius: Radius.md))
+                        .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(.quaternary, lineWidth: 1))
                 }
                 stats
                 highlights
@@ -110,6 +111,8 @@ struct TripSummaryView: View {
             }
             .padding(Spacing.md)
         }
+        .background(Color(.systemGroupedBackground))
+        .scrollContentBackground(.hidden)
         .navigationTitle(summaryModel.title.isEmpty ? String(localized: "Trip summary") : summaryModel.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -153,24 +156,20 @@ struct TripSummaryView: View {
     private var highlights: some View {
         if !summaryModel.summary.highlights.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text("Highlights", comment: "Section header on the trip summary")
-                    .font(.headline)
+                SignHeader("Highlights")
                 ForEach(summaryModel.summary.highlights, id: \.ref) { place in
                     Button {
                         openPlace(place.ref)
                     } label: {
                         Card {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(place.nameLocal).font(.headline)
-                                    if let parent = place.parentName {
-                                        Text(parent).font(.caption).foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
+                            MilestoneRow(
+                                title: place.nameLocal,
+                                subtitle: place.parentName
+                            ) {
                                 if let population = place.population {
-                                    Text("\(Format.population(population)) pop.")
-                                        .font(.caption).foregroundStyle(.secondary)
+                                    Text("\(Format.population(population)) \(String(localized: "pop."))")
+                                        .font(.system(size: 12, weight: .bold)).monospacedDigit()
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -185,19 +184,17 @@ struct TripSummaryView: View {
     private var timeline: some View {
         if !summaryModel.timeline.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text("Timeline", comment: "Section header — chronological list of places passed")
-                    .font(.headline)
+                SignHeader("Timeline")
                 ForEach(summaryModel.timeline) { entry in
-                    HStack(spacing: Spacing.sm) {
+                    HStack(spacing: Spacing.md) {
                         Text(entry.enteredAt, format: .dateTime.hour().minute())
-                            .font(.caption.monospacedDigit())
+                            .font(.system(size: 12, weight: .bold).monospacedDigit())
                             .foregroundStyle(.secondary)
-                        Text(entry.name)
+                        Text(entry.name).font(.system(size: 15, weight: .heavy))
                         Spacer()
-                        Text(entry.tierLabel)
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
+                        TierShield(entry.tierLabel)
                     }
+                    .padding(.vertical, 2)
                 }
             }
         }
