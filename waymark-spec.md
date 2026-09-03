@@ -722,15 +722,15 @@ uyarı gösterilir ("İlçe seviyesinde İstanbul–Ordu yolculuğunda ~35 bildi
 ### 8.2 Live Activity içeriği
 
 **Kilit ekranı (genişletilmiş):**
-- Büyük: mevcut yerleşim veya ilçe adı
-- Alt satır: `İlçe, İl` hiyerarşisi
-- Sağ: nüfus rozeti
-- Alt şerit: bu yolculukta geçilen il/ilçe sayısı
+- Büyük: mevcut yerleşim / ilçe / il adı
+- Alt satır: tam hiyerarşi — `Mahalle, İlçe, Şehir` (mahalle için) veya `İlçe, Şehir`
+- Sağ üst: **il plaka kodu**, yer adıyla aynı büyüklükte, il-sınırı levhası gibi kutulu
+- Alt şerit: geçilen il/ilçe sayısı + küçük nüfus
 
 **Dynamic Island:**
 - Compact leading: küçük ikon
 - Compact trailing: ilçe adı (kısaltılmış)
-- Expanded: kilit ekranının küçültülmüş hali
+- Expanded trailing: plaka rozeti (`PlateBadge`)
 - Minimal: ikon
 
 **Güncelleme sıklığı:** ActivityKit'in bütçesi sınırlıdır. Yerleşim seviyesinde her geçişte
@@ -741,7 +741,7 @@ güncelleme yapmak bütçeyi tüketebilir. Bu yüzden Live Activity güncellemel
 
 ```
 Başlık:  Merzifon'dasın
-Gövde:   Amasya · 52.000 nüfus
+Gövde:   Amasya 05 · 52.000 nüfus       → hiyerarşi + il plakası + nüfus
 Thread:  trip-{tripID}          → aynı yolculuğun bildirimleri gruplanır
 ```
 
