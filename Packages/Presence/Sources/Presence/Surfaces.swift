@@ -13,8 +13,11 @@ import LocationEngine
 public struct LiveActivityState: Sendable, Equatable, Hashable, Codable {
     /// Current settlement or district name — the big line.
     public var headline: String
-    /// "Merzifon, Amasya" — the hierarchy line.
+    /// The full chain — "Merzifon, Amasya" for a district, "Aşağı Mah., Merzifon, Amasya"
+    /// for a neighbourhood.
     public var hierarchy: String
+    /// The province's plate code ("42"), shown on its own like an il-sınırı sign.
+    public var provinceCode: String?
     public var population: Int?
     /// tier raw value → distinct places entered this trip.
     public var tierCounts: [Int: Int]
@@ -24,6 +27,7 @@ public struct LiveActivityState: Sendable, Equatable, Hashable, Codable {
     public init(
         headline: String = "",
         hierarchy: String = "",
+        provinceCode: String? = nil,
         population: Int? = nil,
         tierCounts: [Int: Int] = [:],
         settlementCount: Int = 0,
@@ -31,6 +35,7 @@ public struct LiveActivityState: Sendable, Equatable, Hashable, Codable {
     ) {
         self.headline = headline
         self.hierarchy = hierarchy
+        self.provinceCode = provinceCode
         self.population = population
         self.tierCounts = tierCounts
         self.settlementCount = settlementCount

@@ -147,9 +147,35 @@ public actor PresenceCoordinator: PresencePresenting {
     private func deliverPush(for event: PlaceEvent, place: Place) async {
         guard gate.evaluate(event, now: now) == .allow else { return }
         let notification = copy.makeNotification(
-            for: place, ref: event.place, thread: thread, language: language
+            for: place, ref: event.place,
+            location: pushLocationLine(chain(from: place)),
+            thread: thread, language: language
         )
         await notifications.post(notification)
+    }
+
+    /// "Çumra, Konya 42" — the ancestry minus the place itself, with the province's
+    /// plate code appended. For a province event it's just "Konya 42".
+    private func pushLocationLine(_ ancestry: [Place]) -> String {
+        let parts = ancestry.count > 1 ? Array(ancestry.dropFirst()) : ancestry
+        return parts.map { p in
+            if p.ref.tier == .first, let c = p.code { return "\(p.nameLocal) \(c)" }
+            return p.nameLocal
+        }.joined(separator: ", ")
+    }
+
+    /// Walk `parentRef` up from a place, collecting the chain (finest first).
+    private func chain(from place: Place) -> [Place] {
+        var result = [place]
+        var ref = place.parentRef
+        var hops = 0
+        while let r = ref, hops < 4 {
+            guard let parent = try? places.place(for: r, language: language) else { break }
+            result.append(parent)
+            ref = parent.parentRef
+            hops += 1
+        }
+        return result
     }
 
     private func record(_ event: PlaceEvent, place: Place?) {
@@ -189,16 +215,20 @@ public actor PresenceCoordinator: PresencePresenting {
 
         var headline = ""
         var hierarchy = ""
+        var provinceCode: String?
         var population: Int?
         if let place = headlinePlace {
+            let ancestry = chain(from: place)
             headline = place.nameLocal
-            hierarchy = [place.nameLocal, place.parentName].compactMap { $0 }.joined(separator: ", ")
+            hierarchy = ancestry.map(\.nameLocal).joined(separator: ", ")
+            provinceCode = ancestry.first { $0.ref.tier == .first }?.code
             population = place.population
         }
 
         return LiveActivityState(
             headline: headline,
             hierarchy: hierarchy,
+            provinceCode: provinceCode,
             population: population,
             tierCounts: tierCounts,
             settlementCount: settlementCount,

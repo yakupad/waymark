@@ -26,13 +26,15 @@ func event(_ ref: PlaceRef, at offset: TimeInterval = 0) -> PlaceEvent {
 }
 
 func makePlace(
-    _ ref: PlaceRef, name: String, parent: String? = nil, population: Int? = nil
+    _ ref: PlaceRef, name: String, parent: String? = nil, population: Int? = nil,
+    parentRef: PlaceRef? = nil, code: String? = nil
 ) -> Place {
     Place(
         ref: ref, nameLocal: name, nameLocalized: nil, tierLabel: "",
         parentName: parent, population: population, populationYear: nil,
         areaKm2: nil, elevationMeters: nil, article: nil,
-        centroid: Coordinate(latitude: 39, longitude: 32)
+        centroid: Coordinate(latitude: 39, longitude: 32),
+        parentRef: parentRef, code: code
     )
 }
 

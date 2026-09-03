@@ -123,10 +123,16 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
             let tierLabelText = label(for: tier, in: labels, language: language)
 
             var parentName: String?
+            var parentRef: PlaceRef?
             let parentID: Int64? = row["parent_id"]
-            if let parentID {
-                parentName = try String.fetchOne(
-                    db, sql: "SELECT name_local FROM admin_unit WHERE id = ?", arguments: [parentID]
+            if let parentID,
+               let parentRow = try Row.fetchOne(
+                   db, sql: "SELECT name_local, tier FROM admin_unit WHERE id = ?", arguments: [parentID]
+               ) {
+                parentName = parentRow["name_local"]
+                let parentTier: Int = parentRow["tier"]
+                parentRef = PlaceRef(
+                    kind: .administrative, tier: Tier(rawValue: parentTier), id: Int(parentID)
                 )
             }
 
@@ -157,6 +163,7 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
                 elevationMeters: nil,
                 article: article,
                 centroid: Coordinate(latitude: centroidLat, longitude: centroidLon),
+                parentRef: parentRef,
                 code: code
             )
         }
@@ -170,9 +177,17 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
             ) else { return nil }
 
             let parentID: Int64 = row["parent_id"]
-            let parentName = try String.fetchOne(
-                db, sql: "SELECT name_local FROM admin_unit WHERE id = ?", arguments: [parentID]
-            )
+            var parentName: String?
+            var parentRef: PlaceRef?
+            if let parentRow = try Row.fetchOne(
+                db, sql: "SELECT name_local, tier FROM admin_unit WHERE id = ?", arguments: [parentID]
+            ) {
+                parentName = parentRow["name_local"]
+                let parentTier: Int = parentRow["tier"]
+                parentRef = PlaceRef(
+                    kind: .administrative, tier: Tier(rawValue: parentTier), id: Int(parentID)
+                )
+            }
             let kindRaw: Int = row["kind"]
             let kindLabel: String
             switch Settlement.Kind(rawValue: kindRaw) ?? .village {
@@ -200,7 +215,8 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
                 areaKm2: nil,
                 elevationMeters: elevation,
                 article: article,
-                centroid: Coordinate(latitude: lat, longitude: lon)
+                centroid: Coordinate(latitude: lat, longitude: lon),
+                parentRef: parentRef
             )
         }
     }

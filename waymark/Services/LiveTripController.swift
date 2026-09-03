@@ -234,7 +234,22 @@ final class LiveTripController {
         )
         passedPlaces.insert(passed, at: 0)   // reverse chronological (spec §10)
         headline = place.nameLocal
-        hierarchy = [place.nameLocal, place.parentName].compactMap { $0 }.joined(separator: ", ")
+        hierarchy = hierarchyChain(from: place).joined(separator: ", ")
+    }
+
+    /// "Çeltik, Çumra, Konya" — walk `parentRef` up so a neighbourhood shows its
+    /// district *and* province, not just the immediate parent.
+    private func hierarchyChain(from place: Place) -> [String] {
+        var names = [place.nameLocal]
+        var ref = place.parentRef
+        var hops = 0
+        while let r = ref, hops < 4 {
+            guard let parent = try? env.resolver.place(for: r, language: env.language) else { break }
+            names.append(parent.nameLocal)
+            ref = parent.parentRef
+            hops += 1
+        }
+        return names
     }
 }
 

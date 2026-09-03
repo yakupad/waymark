@@ -52,6 +52,48 @@ struct PresenceCoordinatorTests {
         #expect(posted.first?.body.contains("nüfus") == true)
     }
 
+    @Test func `Live Activity state carries the full chain and the province plate code`() async {
+        let repo = FakePlaceRepository()
+        let province = adminRef(1, 1)
+        let district = adminRef(2, 3)
+        let village = settlementRef(7)
+        repo.add(makePlace(province, name: "Konya", population: 2_300_000, code: "42"))
+        repo.add(makePlace(district, name: "Çumra", parent: "Konya", parentRef: province))
+        repo.add(makePlace(village, name: "Toyçayırı", parent: "Çumra", population: 900, parentRef: district))
+        let activity = RecordingActivitySurface()
+        let clock = MutableTimeSource(t0)
+        let coord = makeCoordinator(
+            repo: repo, activity: activity, notifications: RecordingNotificationSurface(),
+            sensitivity: .settlement, clock: clock
+        )
+        await coord.startActivity(for: makeTrip())
+        await coord.update(with: event(village))
+
+        let state = await activity.updates.last
+        #expect(state?.headline == "Toyçayırı")
+        #expect(state?.hierarchy == "Toyçayırı, Çumra, Konya")
+        #expect(state?.provinceCode == "42")
+    }
+
+    @Test func `Push body embeds the plate on the province and the full chain`() async {
+        let repo = FakePlaceRepository()
+        let province = adminRef(1, 1)
+        let district = adminRef(2, 3)
+        repo.add(makePlace(province, name: "Konya", population: 2_300_000, code: "42"))
+        repo.add(makePlace(district, name: "Çumra", parent: "Konya", population: 60_000, parentRef: province))
+        let notifications = RecordingNotificationSurface()
+        let clock = MutableTimeSource(t0)
+        let coord = makeCoordinator(
+            repo: repo, activity: RecordingActivitySurface(), notifications: notifications,
+            sensitivity: .tier2, clock: clock
+        )
+        await coord.startActivity(for: makeTrip())
+        await coord.update(with: event(district))
+
+        let body = await notifications.posted.first?.body
+        #expect(body?.hasPrefix("Konya 42 · ") == true)
+    }
+
     @Test func `A tier-2 event does not push at tier-1 sensitivity but still updates the activity`() async {
         let (coord, _, activity, notifications, clock) = fixture(sensitivity: .tier1)
         await coord.startActivity(for: makeTrip())

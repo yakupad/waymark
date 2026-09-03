@@ -14,8 +14,10 @@ import GeoData
 import LocationEngine
 
 public protocol NotificationCopy: Sendable {
+    /// `location` is the pre-built hierarchy line ("Çumra, Konya 42") — the caller
+    /// walks the chain and embeds the plate code.
     func makeNotification(
-        for place: Place, ref: PlaceRef, thread: String, language: String
+        for place: Place, ref: PlaceRef, location: String, thread: String, language: String
     ) -> PlaceNotification
 }
 
@@ -24,7 +26,7 @@ public struct DefaultNotificationCopy: NotificationCopy {
     public init() {}
 
     public func makeNotification(
-        for place: Place, ref: PlaceRef, thread: String, language: String
+        for place: Place, ref: PlaceRef, location: String, thread: String, language: String
     ) -> PlaceNotification {
         let isTurkish = language.lowercased().hasPrefix("tr")
         let locale = Locale(identifier: isTurkish ? "tr_TR" : "en_US")
@@ -37,8 +39,8 @@ public struct DefaultNotificationCopy: NotificationCopy {
         }
 
         var bodyParts: [String] = []
-        if let parent = place.parentName {
-            bodyParts.append(parent)
+        if !location.isEmpty {
+            bodyParts.append(location)
         }
         if let population = place.population {
             let number = population.formatted(.number.locale(locale))

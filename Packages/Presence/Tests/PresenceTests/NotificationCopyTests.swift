@@ -30,10 +30,10 @@ struct NotificationCopyTests {
         let ref = adminRef(2, 7)
         let place = makePlace(ref, name: "Merzifon", parent: "Amasya", population: 52_000)
         let n = DefaultNotificationCopy().makeNotification(
-            for: place, ref: ref, thread: "trip-abc", language: "tr"
+            for: place, ref: ref, location: "Amasya 05", thread: "trip-abc", language: "tr"
         )
         #expect(n.title == "Merzifon'dasın")
-        #expect(n.body.hasPrefix("Amasya · "))
+        #expect(n.body.hasPrefix("Amasya 05 · "))
         #expect(n.body.contains("nüfus"))
         #expect(n.threadIdentifier == "trip-abc")
         #expect(n.deepLink?.scheme == "waymark")
@@ -43,7 +43,7 @@ struct NotificationCopyTests {
         let ref = adminRef(1, 3)
         let place = makePlace(ref, name: "Amasya", parent: nil, population: 337_000)
         let n = DefaultNotificationCopy().makeNotification(
-            for: place, ref: ref, thread: "trip-x", language: "en"
+            for: place, ref: ref, location: "Amasya 05", thread: "trip-x", language: "en"
         )
         #expect(n.title == "You're in Amasya")
         #expect(n.body.contains("pop."))
@@ -53,7 +53,7 @@ struct NotificationCopyTests {
         let ref = adminRef(1, 3)
         let place = makePlace(ref, name: "Nowhere")   // no parent, no population
         let n = DefaultNotificationCopy().makeNotification(
-            for: place, ref: ref, thread: "t", language: "tr"
+            for: place, ref: ref, location: "", thread: "t", language: "tr"
         )
         #expect(n.body.isEmpty)
     }

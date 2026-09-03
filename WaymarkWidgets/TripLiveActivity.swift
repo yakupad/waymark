@@ -27,7 +27,9 @@ struct TripLiveActivity: Widget {
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    if let population = context.state.population {
+                    if let code = context.state.provinceCode {
+                        PlateBadge(code, onDark: true)
+                    } else if let population = context.state.population {
                         Text("\(population, format: .number)")
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary)
@@ -62,25 +64,44 @@ private struct LockScreenView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
-                Image(systemName: "location.north.fill")
-                    .font(.system(size: 13, weight: .black))
-                Text(state.headline)
-                    .font(.system(size: 22, weight: .black))
-                    .lineLimit(1)
-                Spacer()
-                if let population = state.population {
-                    Text("\(population, format: .number)")
-                        .font(.system(size: 15, weight: .heavy).monospacedDigit())
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "location.north.fill")
+                            .font(.system(size: 13, weight: .black))
+                        Text(state.headline)
+                            .font(.system(size: 22, weight: .black))
+                            .lineLimit(1)
+                    }
+                    Text(state.hierarchy)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.8))
+                        .textCase(.uppercase)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: Spacing.sm)
+                if let code = state.provinceCode {
+                    // Plate, sized like the place name — the way an il-sınırı sign reads.
+                    Text(code)
+                        .font(.system(size: 22, weight: .black).monospacedDigit())
+                        .tracking(1)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 5))
+                        .foregroundStyle(Color.signBlue)
                 }
             }
-            Text(state.hierarchy)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.8))
-                .textCase(.uppercase)
-                .lineLimit(1)
             Divider().opacity(0.4)
-            TripCountChips(state: state)
+            HStack {
+                TripCountChips(state: state)
+                if let population = state.population {
+                    Spacer()
+                    Text("\(population, format: .number)")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+            }
         }
         .foregroundStyle(.white)
     }

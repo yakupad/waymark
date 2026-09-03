@@ -149,6 +149,8 @@ public struct Place: Identifiable, Sendable {
     public let elevationMeters: Int?
     public let article: Article?
     public let centroid: Coordinate
+    /// The unit one level up, so the full chain (mahalle → ilçe → il) can be walked.
+    public let parentRef: PlaceRef?
     /// A short official code for the unit, shown as a badge when present. Region-defined
     /// (spec K6): Turkey's `il` plate number ("06", "34"), elsewhere an ISO 3166-2
     /// subdivision code or the local equivalent — whatever the pack's `admin_code` holds.
@@ -169,6 +171,7 @@ public struct Place: Identifiable, Sendable {
         elevationMeters: Int?,
         article: Article?,
         centroid: Coordinate,
+        parentRef: PlaceRef? = nil,
         code: String? = nil
     ) {
         self.ref = ref
@@ -182,6 +185,7 @@ public struct Place: Identifiable, Sendable {
         self.elevationMeters = elevationMeters
         self.article = article
         self.centroid = centroid
+        self.parentRef = parentRef
         self.code = code
     }
 }
