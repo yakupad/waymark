@@ -26,6 +26,8 @@ final class LiveTripController {
         let parentName: String?
         let population: Int?
         let enteredAt: Date
+        /// The unit's short code (TR plate number) — only set for the top tier.
+        let code: String?
     }
 
     private(set) var isRunning = false
@@ -42,6 +44,9 @@ final class LiveTripController {
     private(set) var startedAt: Date?
     /// The most recent coordinate — the active-trip map centres on it.
     private(set) var currentCoordinate: Coordinate?
+    /// Plate number of the province you're currently in — shown on the direction
+    /// panel even when the headline is a district (spec: Turkish `il` sign).
+    private(set) var currentProvinceCode: String?
 
     private let env: AppEnvironment
     private let permissions: PermissionsModel
@@ -50,6 +55,7 @@ final class LiveTripController {
     private var record: TripRecord?
     private var events: [PlaceEvent] = []
     private var lastFix: Coordinate?
+    private var lastProvinceRef: PlaceRef?
     /// Fires while stationary so the dwell timer (spec 7.4 "süre ≥ 60s") still advances
     /// even when `CLLocationManager` stops delivering fixes (distanceFilter = 100 m).
     private var heartbeat: Timer?
@@ -76,6 +82,8 @@ final class LiveTripController {
         distanceMeters = 0
         lastFix = nil
         currentCoordinate = nil
+        currentProvinceCode = nil
+        lastProvinceRef = nil
         firstFixAt = nil
         lastFixAt = nil
         fixCount = 0
@@ -180,6 +188,15 @@ final class LiveTripController {
                 .first?.value
             pendingPlace = (deepest ?? resolution.settlement)
                 .flatMap { try? env.resolver.place(for: $0, language: env.language)?.nameLocal }
+
+            // Plate number of the province the current fix is in (not the last
+            // province *event* — the demo route oscillates across borders).
+            let provinceRef = resolution.administrative[.first]
+            if provinceRef != lastProvinceRef {
+                lastProvinceRef = provinceRef
+                currentProvinceCode = provinceRef
+                    .flatMap { try? env.resolver.place(for: $0, language: env.language)?.code }
+            }
         }
 
         if let last = lastFix {
@@ -213,7 +230,7 @@ final class LiveTripController {
         let passed = PassedPlace(
             id: event.id, ref: event.place, name: place.nameLocal,
             tierLabel: place.tierLabel, parentName: place.parentName,
-            population: place.population, enteredAt: event.enteredAt
+            population: place.population, enteredAt: event.enteredAt, code: place.code
         )
         passedPlaces.insert(passed, at: 0)   // reverse chronological (spec §10)
         headline = place.nameLocal

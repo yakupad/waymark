@@ -65,7 +65,10 @@ struct PlaceDetailView: View {
     private func heading(_ place: Place) -> some View {
         SignPanel {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                HStack {
+                HStack(spacing: Spacing.sm) {
+                    if let code = place.code {
+                        PlateBadge(code, onDark: true)
+                    }
                     if let parent = place.parentName {
                         Text(parent)
                             .font(.signLabel).signCaps()

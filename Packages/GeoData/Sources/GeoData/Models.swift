@@ -149,6 +149,11 @@ public struct Place: Identifiable, Sendable {
     public let elevationMeters: Int?
     public let article: Article?
     public let centroid: Coordinate
+    /// A short official code for the unit, shown as a badge when present. Region-defined
+    /// (spec K6): Turkey's `il` plate number ("06", "34"), elsewhere an ISO 3166-2
+    /// subdivision code or the local equivalent — whatever the pack's `admin_code` holds.
+    /// `nil` for tiers where it isn't meaningful to show.
+    public let code: String?
 
     public var id: PlaceRef { ref }
 
@@ -163,7 +168,8 @@ public struct Place: Identifiable, Sendable {
         areaKm2: Double?,
         elevationMeters: Int?,
         article: Article?,
-        centroid: Coordinate
+        centroid: Coordinate,
+        code: String? = nil
     ) {
         self.ref = ref
         self.nameLocal = nameLocal
@@ -176,6 +182,7 @@ public struct Place: Identifiable, Sendable {
         self.elevationMeters = elevationMeters
         self.article = article
         self.centroid = centroid
+        self.code = code
     }
 }
 

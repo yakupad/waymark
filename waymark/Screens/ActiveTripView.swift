@@ -129,7 +129,10 @@ struct ActiveTripView: View {
     ) -> some View {
         SignPanel(tint: tint) {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                HStack {
+                HStack(spacing: Spacing.sm) {
+                    if let code = live.currentProvinceCode {
+                        PlateBadge(code, onDark: true)
+                    }
                     Text(label).font(.signLabel).signCaps().foregroundStyle(.white.opacity(0.9))
                     Spacer()
                     HStack(spacing: 4) {

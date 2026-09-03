@@ -69,6 +69,31 @@ public struct TierShield: View {
     }
 }
 
+// MARK: - Plate badge
+
+/// A short official code (Turkey's `il` plate number, e.g. "06"), boxed the way it
+/// appears on a Turkish province-boundary sign — a plate, not a shield.
+public struct PlateBadge: View {
+    private let code: String
+    private let onDark: Bool
+
+    public init(_ code: String, onDark: Bool = false) {
+        self.code = code
+        self.onDark = onDark
+    }
+
+    public var body: some View {
+        Text(code)
+            .font(.system(size: 15, weight: .black).monospacedDigit())
+            .tracking(1)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(onDark ? Color.white : Color.signBlue, in: RoundedRectangle(cornerRadius: 4))
+            .foregroundStyle(onDark ? Color.signBlue : Color.white)
+            .fixedSize()
+    }
+}
+
 // MARK: - Section header
 
 /// An uppercase, tracked section header with a leading rule.

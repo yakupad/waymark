@@ -141,6 +141,10 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
             let areaKm2: Double? = row["area_km2"]
             let centroidLat: Double = row["centroid_lat"]
             let centroidLon: Double = row["centroid_lon"]
+            // Only the top tier's code is a public-facing identity (TR plate number);
+            // deeper tiers carry an internal statistical code, not worth showing.
+            let adminCode: String? = row["admin_code"]
+            let code = (tier == .first) ? adminCode : nil
             return Place(
                 ref: ref,
                 nameLocal: nameLocal,
@@ -152,7 +156,8 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
                 areaKm2: areaKm2,
                 elevationMeters: nil,
                 article: article,
-                centroid: Coordinate(latitude: centroidLat, longitude: centroidLon)
+                centroid: Coordinate(latitude: centroidLat, longitude: centroidLon),
+                code: code
             )
         }
     }
