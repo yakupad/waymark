@@ -4,9 +4,18 @@
 //
 
 import SwiftUI
+import AppIntents
 
 @main
 struct waymarkApp: App {
+
+    init() {
+        // Register App Intent dependencies here — `App.init()` runs on every
+        // process launch, including the cold, headless launches a Shortcuts
+        // automation triggers, before any intent can resolve `@Dependency`.
+        AppDependencyManager.shared.add(dependency: TripController.shared)
+    }
+
     var body: some Scene {
         WindowGroup {
             AppRootView()
@@ -43,20 +52,20 @@ struct AppRootView: View {
 
     @MainActor
     private func load() {
-        do {
-            let env = try AppEnvironment()
+        switch AppEnvironment.sharedResult {
+        case .success(let env):
             let model = AppModel(env: env)
             model.recoverUnfinishedTripIfNeeded()
             state = .ready(model)
             applyLaunchScreenHook(model)
-        } catch {
+        case .failure(let error):
             state = .failed(String(describing: error))
         }
     }
 
-    /// Screenshot / demo hook: `-waymarkScreen active|summary` jumps straight into a
-    /// running demo trip (or a finished one) so App Store captures and reviewers
-    /// don't have to drive. No effect without the argument.
+    /// Screenshot / demo hook: `-waymarkScreen active|summary|place|settings` jumps
+    /// straight into a demo trip so App Store captures and reviewers don't have to
+    /// drive. No effect without the argument.
     @MainActor
     private func applyLaunchScreenHook(_ model: AppModel) {
         guard let i = CommandLine.arguments.firstIndex(of: "-waymarkScreen"),
@@ -66,12 +75,12 @@ struct AppRootView: View {
             model.selectedTab = .settings
             return
         }
-        model.startTrip()
+        try? TripController.shared.start()
         if screen == "summary" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 35) { model.endTrip() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 35) { TripController.shared.end() }
         } else if screen == "place" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 18) {
-                model.activeTripPresented = false
+                TripController.shared.isActiveTripPresented = false
                 if let ref = model.liveTrip.passedPlaces.last?.ref {
                     model.homePath.append(.place(ref))
                 }

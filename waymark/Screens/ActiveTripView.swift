@@ -126,7 +126,7 @@ struct ActiveTripView: View {
                 List(live.passedPlaces) { passed in
                     Button {
                         model.homePath.append(.place(passed.ref))
-                        model.activeTripPresented = false
+                        TripController.shared.isActiveTripPresented = false
                     } label: {
                         MilestoneRow(title: passed.name, subtitle: passedDetail(passed)) {
                             TierShield(passed.tierLabel)

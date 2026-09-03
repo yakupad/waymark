@@ -14,11 +14,21 @@ import Presence
 @MainActor
 final class AppEnvironment {
 
+    /// Built once per process. App Intents can be invoked cold (no UI), so the
+    /// environment can't live only in the view tree.
+    static let sharedResult: Result<AppEnvironment, any Error> = Result { try AppEnvironment() }
+    static var shared: AppEnvironment? { try? sharedResult.get() }
+
     let resolver: SQLiteGeoResolver
     let tripStore: TripStore
     let settings: SettingsStore
     let locationProvider: any LocationProviding
     let presence: PresenceCoordinator
+
+    /// The permission flow and the live-trip controller are process-wide singletons
+    /// too — both the SwiftUI app and the App Intents reach them through here.
+    private(set) lazy var permissions = PermissionsModel(env: self)
+    private(set) lazy var liveTrip = LiveTripController(env: self, permissions: permissions)
 
     /// The UI language used for place names and articles (spec 11.5 fallback chain).
     let language: String

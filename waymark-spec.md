@@ -95,7 +95,7 @@ yalnızca EN/TR metinleri üretilir.
 | Arayüz dilleri | İngilizce (base) + Türkçe |
 | Hassasiyet seviyeleri | Tier 1 (il), tier 2 (ilçe), köy/kasaba |
 | Tespit yöntemi | Çevrimdışı poligon (il/ilçe) + en yakın nokta (köy) |
-| Yolculuk başlatma | Manuel (kullanıcı butona basar) |
+| Yolculuk başlatma | Manuel (buton) + App Intent (kullanıcının Kısayollar otomasyonu: araç Bluetooth / CarPlay / Maps → Yolculuğa Başla) |
 | Birincil yüzey | Live Activity (kilit ekranı + Dynamic Island) |
 | Push bildirim | Yalnızca kullanıcının seçtiği hassasiyet seviyesinde |
 | İçerik | Nüfus, yüzölçümü, rakım, kısa tarihçe (Vikipedi özeti) |
@@ -907,6 +907,28 @@ Yukarıdakiler Türkçe sürümdür; İngilizce base metin de yazılmalıdır.
 Bu kademeli akış hem dönüşüm oranını artırır hem de App Store incelemesinde
 "neden always gerekiyor" sorusuna somut cevap üretir.
 
+### Otomatik başlatma (F10 — "açmayı unutma")
+
+Yolculuk elle başlatılır, ama kullanıcı bunu unutabilir (otobüs, bisiklet dahil).
+Çözüm, giderek artan efor sırasıyla:
+
+1. **App Intent** — `StartTripIntent` / `EndTripIntent` (`supportedModes: .background`,
+   `allowedExecutionTargets: .main`, `@Dependency var trips: TripController`). Kullanıcı
+   Kısayollar'da **kendi** kişisel otomasyonunu kurar: "arabanın Bluetooth'u bağlanınca",
+   CarPlay, ya da "Harita'yı açtığında" → Yolculuğa Başla. Hiç UI olmadan, arka planda
+   çalışır; zaten süren yolculuk varken idempotent (no-op). Ayarlar'da adım adım tarif +
+   "Kısayolları Aç" butonu.
+2. **Hareket-tabanlı dürtme** (F11) — `CMMotionActivityManager` → sürekli
+   `.automotive` / `.cycling` + aktif yolculuk yok → saatte bir "yolda mısın?" yerel
+   bildirimi. Otomasyon kurmayan kullanıcı için ağ.
+3. **Tam otomatik tespit** — v2 (bkz. Bölüm 3): SLC + geofence + otomotiv/bisiklet
+   sinyali → yolculuğu kendi başlatır.
+
+Uygulama başka bir uygulamanın (Maps vb.) açıldığını **tespit edemez** (iOS gizlilik
+sınırı); "Maps açılınca başlat"ı ancak kullanıcı Kısayollar otomasyonunda kendisi
+tetikleyici olarak seçebilir. Uygulamayı arka plandan zorla öne getirmek de mümkün
+değildir — en fazla yerel bildirim veya (kullanıcının kurduğu) sessiz App Intent.
+
 ### Gizlilik
 
 - `PrivacyInfo.xcprivacy` dosyası zorunludur.
@@ -1068,6 +1090,8 @@ R1 gerçekleşirse (ilçe verisi yetersizse) proje mimarisi değişir. Bunu üç
 | ~~F6~~ | ~~`TripKit` + ana ekranlar (SwiftUI, MVVM-C)~~ | **TAMAM** — simülatörde uçtan uca çalışıyor, 7 ekran + debug menüsü |
 | ~~F7~~ | ~~Harita çizimi, yolculuk özeti, paylaşım görseli~~ | **TAMAM** — `MKMapSnapshotter` paylaşım görseli + önizleme önbelleği simülatörde doğrulandı |
 | ~~F8~~ | ~~Debug menüsü, ayarlar, atıf ekranı, gizlilik dosyası~~ | **TAMAM** — privacy manifest, Widget Extension, App Store taslağı; app + widget Release derleniyor |
+| ~~F10a~~ | ~~App Intent'ler + Kısayollar (otomatik başlatma)~~ | **TAMAM** — `StartTripIntent`/`EndTripIntent`, `WaymarkShortcuts`, `TripController` süreç-geneli singleton, Ayarlar tarifi |
+| **F10b** | Hareket-tabanlı dürtme (`CMMotionActivityManager`) | v1.1 |
 | **F9** | Saha testi, parametre ayarı, App Store | v1.0 |
 
 F2 ve F3 projenin en riskli ve en değerli kısımlarıdır. Zamanın çoğu oraya ayrılmalıdır.

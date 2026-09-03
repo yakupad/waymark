@@ -13,6 +13,7 @@ import DesignSystem
 struct SettingsView: View {
     let model: AppModel
     @State private var authStatus: CLAuthorizationStatus = .notDetermined
+    @Environment(\.openURL) private var openURL
 
     private var env: AppEnvironment { model.env }
 
@@ -54,6 +55,21 @@ struct SettingsView: View {
             }
             .onChange(of: settings.quietHours) { _, new in
                 Task { await env.presence.setQuietHours(new) }
+            }
+
+            Section {
+                Text("Waymark adds **Start a Trip** and **End Trip** actions to the Shortcuts app. Wire them to a personal automation so a trip starts on its own:", comment: "Auto-start help intro")
+                    .font(.footnote)
+                Label("Shortcuts → Automation → New", systemImage: "1.circle")
+                Label("Pick a trigger: your car's Bluetooth, CarPlay, or when you open Maps", systemImage: "2.circle")
+                Label("Add action → search “Waymark” → Start a Trip", systemImage: "3.circle")
+                Button("Open Shortcuts", systemImage: "arrow.up.forward.app") {
+                    if let url = URL(string: "shortcuts://") { openURL(url) }
+                }
+            } header: {
+                Text("Start a trip automatically")
+            } footer: {
+                Text("The action runs in the background — no need to open Waymark. Running it when a trip is already going does nothing.")
             }
 
             Section("Permissions") {

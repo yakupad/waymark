@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import AppIntents
 import GeoData
 import LocationEngine
 import TripKit
@@ -42,43 +43,33 @@ final class AppModel {
         }
     }
 
-    /// The active-trip screen is a full-screen cover over Home.
-    var activeTripPresented = false
-    /// Set when a trip ends — drives the summary sheet.
-    var justFinished: FinishedTrip?
-
-    struct FinishedTrip: Identifiable {
-        let id = UUID()
-        let summary: TripSummary
-        let tripID: UUID?
-    }
-
     let env: AppEnvironment
-    let liveTrip: LiveTripController
-    let permissions: PermissionsModel
+
+    /// Trip lifecycle + modal flags live in the process-wide `TripController` so an
+    /// App Intent can start a trip without the app's UI. These read through to it.
+    var liveTrip: LiveTripController { env.liveTrip }
+    var permissions: PermissionsModel { env.permissions }
 
     init(env: AppEnvironment) {
         self.env = env
-        let permissions = PermissionsModel(env: env)
-        self.permissions = permissions
-        self.liveTrip = LiveTripController(env: env, permissions: permissions)
     }
 
     // MARK: - Trip flow
 
     func startTrip() {
-        liveTrip.start()
-        activeTripPresented = true
+        try? TripController.shared.start()
+        // The system donates intents it runs; an in-app tap it doesn't — so feed
+        // prediction here (spec §11: learn "starts a trip every morning").
+        Task { try? await IntentDonationManager.shared.donate(intent: StartTripIntent()) }
     }
 
     func endTrip() {
-        let summary = liveTrip.stop()
-        justFinished = FinishedTrip(summary: summary, tripID: liveTrip.finishedTripID)
-        activeTripPresented = false
+        TripController.shared.end()
+        Task { try? await IntentDonationManager.shared.donate(intent: EndTripIntent()) }
     }
 
     func dismissSummary() {
-        justFinished = nil
+        TripController.shared.justFinished = nil
     }
 
     /// R4: a trip from a previous launch that never got an `endedAt` (killed in the

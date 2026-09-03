@@ -8,6 +8,7 @@ import SwiftUI
 
 struct RootView: View {
     @Bindable var model: AppModel
+    @State private var trips = TripController.shared
 
     var body: some View {
         TabView(selection: $model.selectedTab) {
@@ -30,10 +31,10 @@ struct RootView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $model.activeTripPresented) {
+        .fullScreenCover(isPresented: $trips.isActiveTripPresented) {
             ActiveTripView(model: model)
         }
-        .sheet(item: $model.justFinished) { finished in
+        .sheet(item: $trips.justFinished) { finished in
             NavigationStack {
                 TripSummaryView(
                     source: .justFinished(summary: finished.summary, tripID: finished.tripID),
