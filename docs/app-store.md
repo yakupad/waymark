@@ -246,28 +246,27 @@ Not applicable — the app has no accounts or login.
 **Required:** at least one 6.9" iPhone screenshot (1320 × 2868 px, portrait).
 Apple up-scales 6.9" to fill the 6.5"/6.7" slots, so one set is enough.
 
-Delivered in `docs/app-store/screenshots/`:
+Delivered in `docs/app-store/screenshots/`, framed, for both locales:
 
-| Locale | File | Screen |
-|---|---|---|
-| en | `en/en-1-home.png` | Home — start button, current place, recent trips |
-| en | `en/en-2-active.png` | Active trip — current place, live map, places passed |
-| en | `en/en-3-summary.png` | Trip summary — route, stats, highlights, timeline |
-| tr | `tr/tr-1-home.png` | Ana ekran (Turkish UI) |
+| File | Screen |
+|---|---|
+| `{en,tr}/*-home.png` | Home — start button, current place, recent trips |
+| `{en,tr}/*-active.png` | Active trip — direction panel, live map, places passed |
+| `{en,tr}/*-summary.png` | Trip summary — route, stats, highlights, timeline |
+| `{en,tr}/*-place.png` | Place detail — population, area, Wikipedia summary |
 
 Raw (unframed) device captures are in `screenshots/raw/`.
 
-**Still to capture** (5 min on a real device during field testing — Simulator
-input was unreliable here):
-- `tr` Active trip + Trip summary (Turkish UI — force with
-  `-AppleLanguages '(tr)' -AppleLocale tr_TR` launch args)
-- Optional extras for both locales: Place detail (population + Wikipedia),
-  Settings (notification sensitivity), a real lock-screen Live Activity
+**Optional extras** (grab on a real device during field testing): Settings,
+a real lock-screen Live Activity.
 
-Regenerate the framed images:
+Captured with the `-waymarkScreen active|summary|place` launch hook (see
+`waymark/App/waymarkApp.swift`) plus `-AppleLanguages '(tr)' -AppleLocale tr_TR`
+for the Turkish set. Regenerate the framed images:
 ```
+xcrun simctl launch <sim> tr.com.yakupad.waymark -waymarkScreen active
+xcrun simctl io <sim> screenshot raw/en-active.png
 swift tools/appstore/frame.swift <rawDir> docs/app-store/screenshots/en en
-swift tools/appstore/frame.swift <rawDir> docs/app-store/screenshots/tr tr
 # then: sips -z 2868 1320 on each (lockFocus renders @2x)
 ```
 
