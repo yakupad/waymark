@@ -1235,6 +1235,17 @@ ve Release derleniyor.
 - `tools/data/` gitignore'da (625 MB PBF + 46 MB cache commit edilmez).
 
 **F8/F9 cila + App Store hazırlığı (2026-09-03):**
+**Görsel yeniden tasarım + GitHub (2026-09-03):**
+- Repo `github.com/yakupad/waymark` (public) — F1→redesign alt-sistem bazlı commit'ler.
+  GitHub Pages'i kullanıcı elle açacak (Settings → Pages → main → /docs).
+- **"Yol tabelası" görsel dili:** DesignSystem yeniden yazıldı — `SignPanel` (mavi
+  üstüne beyaz yön levhası + ince keyline), `TierShield` (İL/İLÇE/KÖY), `SignStat`
+  (tabeladaki km gibi rakam), `MilestoneRow` (chevron). Tüm ekranlar + Live Activity +
+  en/tr metinler. Rota çizgisi beyaz kılıf + mavi; işaretçi kuzey-oku chevron.
+- **Screenshot hook:** `-waymarkScreen active|summary|place` demo yolculuğa atlar;
+  `PermissionsModel.demoMode` sistem uyarılarını bastırır. 8 çerçeveli görüntü
+  (`tools/appstore/frame.swift`) `docs/app-store/screenshots/{en,tr}/`.
+
 - `PermissionsModel` — ilk yolculukta bildirim izni + kademeli "Always" konum yükseltme
   kartı (`ActiveTripView`). R4 kurtarma artık `HomeView`'da modal olmayan kart.
 - `SQLiteGeoResolver.settlementPlace(...)` — `place(for:)` artık yerleşimleri de doldurur
