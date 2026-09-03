@@ -1,0 +1,24 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+.swiftpm/
+*.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+# Keep the app workspace's Package.resolved (reproducible builds); ignore the
+# standalone one that `swift build` drops in a library package root.
+.build/
+/Packages/*/Package.resolved
+
+# Pipeline
+tools/.venv/
+tools/data/
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# macOS
+.DS_Store
