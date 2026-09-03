@@ -11,7 +11,7 @@
 // ActivityKit's module imports on macOS but its API is unavailable there — gate on the OS.
 #if os(iOS)
 import Foundation
-import ActivityKit
+@preconcurrency import ActivityKit
 
 /// ActivityKit attributes for a trip's Live Activity. `ContentState` is the rendered
 /// `LiveActivityState` produced by `PresenceCoordinator`.
@@ -26,26 +26,26 @@ public struct WaymarkActivityAttributes: ActivityAttributes, Sendable {
     }
 }
 
+/// `@MainActor` because ActivityKit's request / update / end must run on the main
+/// thread — off it they raise `NSInternalInconsistencyException` ("Call must be made
+/// on main thread"), which `try?` does NOT catch. `PresenceCoordinator` is an actor
+/// and calls these with `await`, which hops here. `Activity` isn't `Sendable`, so it
+/// must never leave this actor — keeping it main-isolated is the clean way.
 @available(iOS 16.2, *)
-public final class LiveActivitySurface: ActivitySurface, @unchecked Sendable {
+@MainActor
+public final class LiveActivitySurface: ActivitySurface {
 
-    private let lock = NSLock()
-    private var activity: Activity<WaymarkActivityAttributes>?
+    private var current: Activity<WaymarkActivityAttributes>?
     private let staleAfter: TimeInterval
 
     public init(staleAfter: TimeInterval = 90 * 60) {
         self.staleAfter = staleAfter
     }
 
-    private var current: Activity<WaymarkActivityAttributes>? {
-        get { lock.withLock { activity } }
-        set { lock.withLock { activity = newValue } }
-    }
-
     public func start(_ state: LiveActivityState, thread: String) async {
         await end(state)
-        // `areActivitiesEnabled` is the documented gate, but it reads false spuriously on
-        // the Simulator; just attempt the request and let it fail quietly if unsupported.
+        // `areActivitiesEnabled` reads false spuriously on the Simulator; just
+        // attempt the request and let it fail quietly if unsupported.
         current = try? Activity.request(
             attributes: WaymarkActivityAttributes(tripThread: thread),
             content: ActivityContent(state: state, staleDate: Date().addingTimeInterval(staleAfter))

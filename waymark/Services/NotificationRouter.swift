@@ -6,14 +6,16 @@
 import Foundation
 import UserNotifications
 
-@MainActor
+/// Plain `NSObject` — `UNUserNotificationCenterDelegate` is nonisolated and the
+/// system calls it off the main thread, so everything that touches app state hops
+/// explicitly.
 final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
 
     static let shared = NotificationRouter()
     private override init() { super.init() }
 
-    nonisolated static let travelNudgeCategory = "travel-nudge"
-    nonisolated static let startTripAction = "START_TRIP"
+    static let travelNudgeCategory = "travel-nudge"
+    static let startTripAction = "START_TRIP"
 
     /// Call once from `App.init()` — before any notification can be delivered.
     func register() {
@@ -34,19 +36,26 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate {
         ])
     }
 
-    // Show the banner even if the app happens to be foregrounded.
-    nonisolated func userNotificationCenter(
+    func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        [.banner, .sound]
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        // Suppress crossing alerts while the app is open (the Live Activity and the
+        // in-app list already show them); still surface the travel nudge.
+        let isNudge = notification.request.content.categoryIdentifier == Self.travelNudgeCategory
+        completionHandler(isNudge ? [.banner, .sound] : [])
     }
 
-    nonisolated func userNotificationCenter(
+    func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        guard response.actionIdentifier == Self.startTripAction else { return }
-        await MainActor.run { try? TripController.shared.start() }
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let isStartAction = response.actionIdentifier == Self.startTripAction
+        Task { @MainActor in
+            if isStartAction { try? TripController.shared.start() }
+            completionHandler()
+        }
     }
 }
