@@ -29,7 +29,8 @@ final class TravelNudge {
     private var isUpdating = false
 
     var isAvailable: Bool { CMMotionActivityManager.isActivityAvailable() }
-    var authorization: CMAuthorizationStatus { CMMotionActivityManager.authorizationStatus() }
+    /// Motion access was explicitly denied — the Settings toggle shows a hint.
+    var isAccessDenied: Bool { CMMotionActivityManager.authorizationStatus() == .denied }
 
     // MARK: - Lifecycle
 

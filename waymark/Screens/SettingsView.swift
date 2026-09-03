@@ -62,7 +62,7 @@ struct SettingsView: View {
                     .onChange(of: settings.travelReminders) { _, on in
                         TravelNudge.shared.setEnabled(on)
                     }
-                if settings.travelReminders, TravelNudge.shared.authorization == .denied {
+                if settings.travelReminders, TravelNudge.shared.isAccessDenied {
                     Text("Motion access is off. Turn it on in iOS Settings › Waymark › Motion & Fitness.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
