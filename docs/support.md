@@ -45,8 +45,8 @@ stores is on your device and goes with it.
 
 ## Contact
 
-Email: **<support-email>**
-We usually reply within a few days.
+Report a problem or suggest a correction:
+**<https://github.com/yakupad/waymark/issues>**
 
 Privacy policy: **https://yakupad.github.io/waymark/privacy/**
 
@@ -97,7 +97,7 @@ sakladığı her şey cihazınızdadır ve onunla birlikte gider.
 
 ## İletişim
 
-E-posta: **<support-email>**
-Genellikle birkaç gün içinde yanıt veriyoruz.
+Bir sorunu bildir veya düzeltme öner:
+**<https://github.com/yakupad/waymark/issues>**
 
 Gizlilik politikası: **https://yakupad.github.io/waymark/privacy/**

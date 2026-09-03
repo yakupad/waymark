@@ -138,9 +138,9 @@ Served by GitHub Pages from `docs/` on `main` (see §6):
 - **Marketing URL:** `https://yakupad.github.io/waymark/` (or leave blank for v1)
 - **Privacy Policy URL (required):** `https://yakupad.github.io/waymark/privacy/`
 
-> The support page shows a placeholder `<support-email>` — set a real contact
-> address before submitting (App Review checks the support URL is reachable and
-> has a way to contact you).
+Support contact is the public GitHub issue tracker
+(`https://github.com/yakupad/waymark/issues`). App Review accepts this; if they
+push back, add an email in App Store Connect › App Information › Support.
 
 ### 2.7 Copyright
 `2026 Yakup Ad`

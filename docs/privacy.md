@@ -84,7 +84,8 @@ before it ships.
 
 ## Contact
 
-Questions about privacy: **<support-email>**
+Questions about privacy: open an issue at
+<https://github.com/yakupad/waymark/issues>
 
 ---
 
@@ -171,4 +172,4 @@ notlarında açıklanacaktır.
 
 ## İletişim
 
-Gizlilikle ilgili sorular: **<support-email>**
+Gizlilikle ilgili sorular: <https://github.com/yakupad/waymark/issues> adresinden bir issue açın
