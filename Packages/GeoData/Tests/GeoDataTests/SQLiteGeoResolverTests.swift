@@ -122,6 +122,22 @@ struct SQLiteGeoResolverTests {
         #expect(place.article?.language == "en")
     }
 
+    @Test func `A settlement's parent comes from real polygon containment, not the stored parent_id`() throws {
+        // Fixture settlement 6 ("Yanlış Mahalle") sits at (39.5, 31.7) — truly inside
+        // İlçe C1 (id 3) / Test İli A (id 1), per the "Resolves a point…" test above —
+        // but its stored `parent_id` in the settlement table points at İlçe D1 (id 5),
+        // which belongs to a completely different province (Test İli B). This is the
+        // real F1 pipeline bug (a settlement's nearest-match parent can land far from
+        // its true location) — the resolver must self-correct via the polygon it
+        // already trusts for `resolve(coordinate:)`, not echo the bad stored value.
+        let place = try #require(
+            try resolver.place(for: PlaceRef(kind: .settlement, tier: nil, id: 6), language: "tr")
+        )
+        #expect(place.parentName == "İlçe C1")
+        #expect(place.parentRef?.id == 3)
+        #expect(place.parentRef?.tier == .second)
+    }
+
     @Test func `Resolver is shareable across concurrent tasks`() async throws {
         let resolver = self.resolver
         await withTaskGroup(of: Int?.self) { group in

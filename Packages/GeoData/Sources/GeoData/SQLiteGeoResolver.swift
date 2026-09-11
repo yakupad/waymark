@@ -176,10 +176,32 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
                 db, sql: "SELECT * FROM settlement WHERE id = ?", arguments: [ref.id]
             ) else { return nil }
 
-            let parentID: Int64 = row["parent_id"]
+            let lat: Double = row["lat"]
+            let lon: Double = row["lon"]
+            let coordinate = Coordinate(latitude: lat, longitude: lon)
+
+            // The settlement table's stored `parent_id` (an F1 pipeline match, not true
+            // containment) can be wrong — a village can end up parented to an unrelated
+            // district hundreds of km away. Trust real polygon containment at the
+            // settlement's own point instead, the same walk `resolve(coordinate:)` uses;
+            // fall back to the stored id only if that somehow finds nothing (e.g. a point
+            // just outside every polygon due to simplification).
+            var parentID: Int64?
+            for tier in tiers {
+                let candidateIDs = try candidateAdminIDs(
+                    db, tier: tier, coordinate: coordinate, parentID: parentID
+                )
+                guard let hitID = try firstAdminContaining(db, coordinate: coordinate, ids: candidateIDs)
+                else { break }
+                parentID = hitID
+            }
+            if parentID == nil {
+                parentID = row["parent_id"]
+            }
+
             var parentName: String?
             var parentRef: PlaceRef?
-            if let parentRow = try Row.fetchOne(
+            if let parentID, let parentRow = try Row.fetchOne(
                 db, sql: "SELECT name_local, tier FROM admin_unit WHERE id = ?", arguments: [parentID]
             ) {
                 parentName = parentRow["name_local"]
@@ -202,8 +224,6 @@ public final class SQLiteGeoResolver: GeoResolving, PlaceRepository, Sendable {
             let nameEnglish: String? = row["name_en"]
             let population: Int? = row["population"]
             let elevation: Int? = row["elevation_m"]
-            let lat: Double = row["lat"]
-            let lon: Double = row["lon"]
             return Place(
                 ref: ref,
                 nameLocal: nameLocal,
