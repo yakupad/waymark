@@ -3,8 +3,8 @@
 //
 //  Spec §10 "Paylaşım önizleme": generated image, trim-distance control, "start and end
 //  hidden" badge. The shareable image is produced by `ShareImageRenderer`
-//  (`MKMapSnapshotter` + Core Graphics, spec 7.7); the on-screen preview is a fast
-//  `Canvas` sketch that updates instantly as the trim changes.
+//  (`MKMapSnapshotter` + Core Graphics, spec 7.7); the on-screen preview is a live
+//  `RouteMap` that updates instantly as the trim changes.
 
 import SwiftUI
 import GeoData
@@ -18,6 +18,7 @@ struct SharePreviewView: View {
     let env: AppEnvironment
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var trimMeters: Double
     @State private var rendered: RenderState = .idle
 
@@ -25,6 +26,15 @@ struct SharePreviewView: View {
 
     private enum RenderState: Equatable {
         case idle, rendering, ready(Image), failed
+    }
+
+    /// Landscape on a phone — the portrait stack (fixed-height map, then controls below)
+    /// leaves the controls squeezed under a wide, short map. Split into two columns instead.
+    private var isLandscapePhone: Bool {
+        #if DEBUG
+        if CommandLine.arguments.contains("-forceWideLayout") { return true }
+        #endif
+        return verticalSizeClass == .compact
     }
 
     init(route: RouteTrace, summary: TripSummary, env: AppEnvironment) {
@@ -40,23 +50,8 @@ struct SharePreviewView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: Spacing.md) {
-                preview
-                if trimMeters > 0 {
-                    Label("Start and end hidden", systemImage: "eye.slash")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Picker("Trim ends", selection: $trimMeters) {
-                    ForEach(trimOptions, id: \.self) { meters in
-                        Text(meters == 0 ? String(localized: "Off") : Format.distance(meters))
-                            .tag(meters)
-                    }
-                }
-                .pickerStyle(.segmented)
-
-                shareButton
-                Spacer(minLength: 0)
+            Group {
+                if isLandscapePhone { landscapeLayout } else { portraitLayout }
             }
             .padding(Spacing.md)
             .navigationTitle("Share")
@@ -73,9 +68,50 @@ struct SharePreviewView: View {
         }
     }
 
+    private var portraitLayout: some View {
+        VStack(spacing: Spacing.md) {
+            preview.frame(height: 300)
+            trimHint
+            trimPicker
+            shareButton
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var landscapeLayout: some View {
+        HStack(alignment: .top, spacing: Spacing.md) {
+            preview.frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(spacing: Spacing.md) {
+                trimHint
+                trimPicker
+                shareButton
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private var trimHint: some View {
+        if trimMeters > 0 {
+            Label("Start and end hidden", systemImage: "eye.slash")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var trimPicker: some View {
+        Picker("Trim ends", selection: $trimMeters) {
+            ForEach(trimOptions, id: \.self) { meters in
+                Text(meters == 0 ? String(localized: "Off") : Format.distance(meters))
+                    .tag(meters)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
     private var preview: some View {
         RouteMap(route: trimmedRoute)
-            .frame(height: 300)
             .clipShape(.rect(cornerRadius: Radius.md))
             .overlay(alignment: .bottomLeading) { previewCaption }
             .overlay(alignment: .bottomTrailing) {

@@ -103,10 +103,14 @@ enum ShareImageRenderer {
 
     private static func drawStats(_ stats: Stats, size: CGSize, in context: CGContext) {
         let line1 = Format.distance(stats.distanceMeters)
-        let line2 = String(
+        // `^[...](inflect: true)` grammar agreement only resolves through `AttributedString`'s
+        // markdown parsing (as `Text` uses internally) — `String(localized:)` leaves the
+        // markup as literal text, so the drawn caption would read "^[2 province](inflect:
+        // true)" verbatim.
+        let line2 = String(AttributedString(
             localized: "^[\(stats.provinceCount) province](inflect: true) · ^[\(stats.districtCount) district](inflect: true) · \(Format.duration(stats.duration))",
             comment: "Share image caption — counts and duration"
-        )
+        ).characters)
 
         let title = NSAttributedString(string: line1, attributes: [
             .font: UIFont.systemFont(ofSize: 34, weight: .bold),

@@ -10,6 +10,10 @@ import DesignSystem
 struct ActiveTripView: View {
     let model: AppModel
 
+    /// Local to the full-screen cover — pushing a passed place here keeps the trip
+    /// visibly active underneath; it must NOT touch `homePath` or dismiss the cover,
+    /// or "back" would land on Home looking like the trip had ended (it hadn't).
+    @State private var path: [AppRoute] = []
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     private var live: LiveTripController { model.liveTrip }
@@ -23,7 +27,7 @@ struct ActiveTripView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if isLandscapePhone { landscapeLayout } else { portraitLayout }
             }
@@ -35,6 +39,7 @@ struct ActiveTripView: View {
                     Button("End", role: .destructive) { model.endTrip() }
                 }
             }
+            .withAppRoutes(model: model)
         }
     }
 
@@ -170,8 +175,7 @@ struct ActiveTripView: View {
                     .padding(.horizontal, Spacing.md)
                 List(live.passedPlaces) { passed in
                     Button {
-                        model.homePath.append(.place(passed.ref))
-                        TripController.shared.isActiveTripPresented = false
+                        path.append(.place(passed.ref))
                     } label: {
                         MilestoneRow(title: passed.name, subtitle: passedDetail(passed)) {
                             TierShield(passed.tierLabel)
