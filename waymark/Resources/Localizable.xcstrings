@@ -834,6 +834,7 @@
       }
     },
     "places" : {
+      "extractionState" : "stale",
       "localizations" : {
         "tr" : {
           "stringUnit" : {

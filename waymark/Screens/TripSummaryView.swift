@@ -235,25 +235,28 @@ struct TripSummaryView: View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 SignHeader("Timeline")
                 ForEach(summaryModel.timeline) { entry in
-                    // `.top`, not the default `.center` — some rows have a two-line leading
-                    // column (time + leg speed) and some just one (no earlier point to
-                    // measure a speed from), and centering let the place name drift up/down
-                    // between rows depending on which.
-                    HStack(alignment: .top, spacing: Spacing.md) {
-                        VStack(alignment: .leading, spacing: 1) {
+                    Button {
+                        openPlace(entry.ref)
+                    } label: {
+                        // A fixed-width leading time column keeps the place name starting at
+                        // the same x on every row.
+                        HStack(spacing: Spacing.md) {
                             Text(entry.enteredAt, format: .dateTime.hour().minute())
                                 .font(.system(size: 12, weight: .bold).monospacedDigit())
                                 .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .frame(width: 50, alignment: .leading)
+                            Text(entry.name).font(.system(size: 15, weight: .heavy))
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                            Spacer()
                             if let legSpeedKmh = entry.legSpeedKmh {
-                                Text(Format.speed(kmh: legSpeedKmh))
-                                    .font(.system(size: 10, weight: .semibold).monospacedDigit())
-                                    .foregroundStyle(.tertiary)
+                                SpeedBadge(kmh: legSpeedKmh)
                             }
+                            TierShield(entry.tierLabel)
                         }
-                        Text(entry.name).font(.system(size: 15, weight: .heavy))
-                        Spacer()
-                        TierShield(entry.tierLabel)
                     }
+                    .buttonStyle(.plain)
                     .padding(.vertical, 2)
                 }
             }

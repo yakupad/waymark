@@ -193,6 +193,7 @@ struct TripListItem: Identifiable, Equatable {
     let id: UUID
     let title: String
     let startedAt: Date
+    let endedAt: Date?
     let distanceMeters: Double
     let placeCount: Int
     let route: RouteTrace?
@@ -203,6 +204,7 @@ struct TripListItem: Identifiable, Equatable {
     init(_ record: TripRecord) {
         id = record.id
         startedAt = record.startedAt
+        endedAt = record.endedAt
         distanceMeters = record.distanceMeters
         route = record.route
         let events = record.events
@@ -216,9 +218,12 @@ struct TripListItem: Identifiable, Equatable {
 struct TripRowView: View {
     let item: TripListItem
 
+    // Date on its own line, then start–end time + distance below — on one line this
+    // ran long enough on a narrow phone to truncate ("· …").
     private var detail: String {
         let date = item.startedAt.formatted(.dateTime.day().month().year())
-        return "\(date)  ·  \(Format.distance(item.distanceMeters))  ·  \(item.placeCount) \(String(localized: "places"))"
+        let time = item.endedAt.map { "\(Format.time(item.startedAt))–\(Format.time($0))" } ?? Format.time(item.startedAt)
+        return "\(date)\n\(time)  ·  \(Format.distance(item.distanceMeters))"
     }
 
     var body: some View {

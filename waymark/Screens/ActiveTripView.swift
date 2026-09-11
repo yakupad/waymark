@@ -175,9 +175,7 @@ struct ActiveTripView: View {
                     SignHeader("Places passed")
                     Spacer()
                     if let currentSpeedKmh = live.currentSpeedKmh {
-                        Text(Format.speed(kmh: currentSpeedKmh))
-                            .font(.system(size: 12, weight: .bold)).monospacedDigit()
-                            .foregroundStyle(.secondary)
+                        SpeedBadge(kmh: currentSpeedKmh)
                     }
                 }
                 .padding(.horizontal, Spacing.md)
@@ -186,7 +184,12 @@ struct ActiveTripView: View {
                         path.append(.place(passed.ref))
                     } label: {
                         MilestoneRow(title: passed.name, subtitle: passedDetail(passed)) {
-                            TierShield(passed.tierLabel)
+                            HStack(spacing: Spacing.xs) {
+                                if let legSpeedKmh = passed.legSpeedKmh {
+                                    SpeedBadge(kmh: legSpeedKmh)
+                                }
+                                TierShield(passed.tierLabel)
+                            }
                         }
                     }
                     .buttonStyle(.plain)
@@ -202,9 +205,6 @@ struct ActiveTripView: View {
         if let parent = passed.parentName { parts.append(parent) }
         if let population = passed.population {
             parts.append("\(Format.population(population)) \(String(localized: "pop."))")
-        }
-        if let legSpeedKmh = passed.legSpeedKmh {
-            parts.append(Format.speed(kmh: legSpeedKmh))
         }
         return parts.isEmpty ? nil : parts.joined(separator: "  ·  ")
     }

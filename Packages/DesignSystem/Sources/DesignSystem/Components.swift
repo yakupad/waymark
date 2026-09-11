@@ -94,6 +94,28 @@ public struct PlateBadge: View {
     }
 }
 
+// MARK: - Speed badge
+
+/// A round speed-limit-sign badge (white disc, red ring, black number) — the same
+/// road-sign language as `PlateBadge`, but for a speed reading rather than a plate code.
+public struct SpeedBadge: View {
+    private let kmh: Double
+
+    public init(kmh: Double) {
+        self.kmh = kmh
+    }
+
+    public var body: some View {
+        Text(kmh.formatted(.number.precision(.fractionLength(0))))
+            .font(.system(size: 10, weight: .black).monospacedDigit())
+            .foregroundStyle(.black)
+            .frame(width: 22, height: 22)
+            .background(Circle().fill(.white))
+            .overlay(Circle().stroke(Color.red, lineWidth: 2.5))
+            .fixedSize()
+    }
+}
+
 // MARK: - Section header
 
 /// An uppercase, tracked section header with a leading rule.
@@ -245,7 +267,7 @@ public struct MilestoneRow<Trailing: View>: View {
                     Text(subtitle)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
             }
             Spacer(minLength: Spacing.sm)
