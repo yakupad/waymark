@@ -22,7 +22,17 @@ final class TripSummaryModel {
     private(set) var route: RouteTrace = .empty
     private(set) var summary = TripSummary()
     private(set) var timeline: [TimelineEntry] = []
+    private(set) var startedAt: Date?
+    private(set) var endedAt: Date?
     var sharePresented = false
+
+    /// Overall average speed, distance over the full duration — `nil` for a
+    /// zero-length duration (shouldn't happen for a finished trip, but Format.speed
+    /// would otherwise show a bogus 0 km/h).
+    var averageSpeedKmh: Double? {
+        guard summary.duration > 0 else { return nil }
+        return (summary.distanceMeters / summary.duration) * 3.6
+    }
 
     struct TimelineEntry: Identifiable {
         let id: UUID
@@ -30,6 +40,10 @@ final class TripSummaryModel {
         let tierLabel: String
         let enteredAt: Date
         let ref: PlaceRef
+        /// Average speed for the leg that ended here — from the previous place (or the
+        /// trip's start, for the first entry) to this one. `nil` when there's no earlier
+        /// point to measure from (route recording off, or an instant first fix).
+        let legSpeedKmh: Double?
     }
 
     private let env: AppEnvironment
@@ -59,11 +73,31 @@ final class TripSummaryModel {
     private func populate(from record: TripRecord) {
         route = record.route ?? .empty
         title = record.title ?? String(localized: "Trip")
+        startedAt = record.startedAt
+        endedAt = record.endedAt
+
+        // Leg speed walks from the trip's first known point (the recorded route's start,
+        // when there is one) through each event's own coordinate — not the route trace
+        // shown on the map, so it stays correct even when the route was trimmed or deleted.
+        var previous: (coordinate: Coordinate, at: Date)?
+        if let firstPoint = route.segments.first?.points.first {
+            previous = (firstPoint, route.segments.first!.startedAt)
+        }
         timeline = record.events.map { event in
             let place = try? env.resolver.place(for: event.place, language: env.language)
+            var legSpeedKmh: Double?
+            if let previous {
+                let seconds = event.enteredAt.timeIntervalSince(previous.at)
+                if seconds > 0 {
+                    let metersPerSecond = Haversine.distance(previous.coordinate, event.coordinate) / seconds
+                    legSpeedKmh = metersPerSecond * 3.6
+                }
+            }
+            previous = (event.coordinate, event.enteredAt)
             return TimelineEntry(
                 id: event.id, name: place?.nameLocal ?? "—",
-                tierLabel: place?.tierLabel ?? "", enteredAt: event.enteredAt, ref: event.place
+                tierLabel: place?.tierLabel ?? "", enteredAt: event.enteredAt, ref: event.place,
+                legSpeedKmh: legSpeedKmh
             )
         }
     }
@@ -105,6 +139,7 @@ struct TripSummaryView: View {
                         .clipShape(.rect(cornerRadius: Radius.md))
                         .overlay(RoundedRectangle(cornerRadius: Radius.md).stroke(.quaternary, lineWidth: 1))
                 }
+                timeRange
                 stats
                 highlights
                 timeline
@@ -137,14 +172,28 @@ struct TripSummaryView: View {
         .onAppear { summaryModel.load() }
     }
 
+    @ViewBuilder
+    private var timeRange: some View {
+        if let started = summaryModel.startedAt, let ended = summaryModel.endedAt {
+            Text("\(Format.time(started)) – \(Format.time(ended))")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.secondary)
+        }
+    }
+
     private var stats: some View {
         let counts = summaryModel.summary.countsByTier.sorted { $0.key < $1.key }
-        return HStack(spacing: Spacing.sm) {
-            ForEach(counts, id: \.key) { tier, count in
-                StatTile(value: "\(count)", label: tierLabel(tier))
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Spacing.sm) {
+                ForEach(counts, id: \.key) { tier, count in
+                    StatTile(value: "\(count)", label: tierLabel(tier))
+                }
+                StatTile(value: "\(summaryModel.summary.settlementCount)", label: "Settlements")
+                StatTile(value: Format.distance(summaryModel.summary.distanceMeters), label: "Distance")
+                if let avgSpeed = summaryModel.averageSpeedKmh {
+                    StatTile(value: Format.speed(kmh: avgSpeed), label: "Avg speed")
+                }
             }
-            StatTile(value: "\(summaryModel.summary.settlementCount)", label: "Settlements")
-            StatTile(value: Format.distance(summaryModel.summary.distanceMeters), label: "Distance")
         }
     }
 
@@ -186,10 +235,21 @@ struct TripSummaryView: View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 SignHeader("Timeline")
                 ForEach(summaryModel.timeline) { entry in
-                    HStack(spacing: Spacing.md) {
-                        Text(entry.enteredAt, format: .dateTime.hour().minute())
-                            .font(.system(size: 12, weight: .bold).monospacedDigit())
-                            .foregroundStyle(.secondary)
+                    // `.top`, not the default `.center` — some rows have a two-line leading
+                    // column (time + leg speed) and some just one (no earlier point to
+                    // measure a speed from), and centering let the place name drift up/down
+                    // between rows depending on which.
+                    HStack(alignment: .top, spacing: Spacing.md) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(entry.enteredAt, format: .dateTime.hour().minute())
+                                .font(.system(size: 12, weight: .bold).monospacedDigit())
+                                .foregroundStyle(.secondary)
+                            if let legSpeedKmh = entry.legSpeedKmh {
+                                Text(Format.speed(kmh: legSpeedKmh))
+                                    .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
                         Text(entry.name).font(.system(size: 15, weight: .heavy))
                         Spacer()
                         TierShield(entry.tierLabel)

@@ -176,6 +176,16 @@ enum Format {
     static func duration(_ seconds: TimeInterval) -> String {
         Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))
     }
+
+    static func time(_ date: Date) -> String {
+        date.formatted(date: .omitted, time: .shortened)
+    }
+
+    static func speed(kmh: Double) -> String {
+        Measurement(value: kmh, unit: UnitSpeed.kilometersPerHour)
+            .formatted(.measurement(width: .abbreviated, usage: .general,
+                                    numberFormatStyle: .number.precision(.fractionLength(0...1))))
+    }
 }
 
 /// A row summarising a stored trip (Home "recent", History list).

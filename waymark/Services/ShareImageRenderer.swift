@@ -58,6 +58,9 @@ enum ShareImageRenderer {
         return renderer.image { context in
             snapshot.image.draw(at: .zero)
             drawRoute(route, snapshot: snapshot, in: context.cgContext)
+            if !trimmed {
+                drawEndpoints(route, snapshot: snapshot, in: context.cgContext)
+            }
             drawStats(stats, size: size, in: context.cgContext)
             if trimmed {
                 drawTrimBadge(size: size, in: context.cgContext)
@@ -98,6 +101,52 @@ enum ShareImageRenderer {
             context.beginPath()
             context.addLines(between: points)
             context.strokePath()
+        }
+    }
+
+    /// Mirrors `RouteMap.endpoints` (spec: hollow ring at the start, pin at the end) — the
+    /// on-screen preview draws these via SwiftUI `Annotation`s, but that view is never used
+    /// to produce the shared PNG (spec 7.7: `Map` renders blank inside `ImageRenderer`), so
+    /// the export needs its own Core Graphics equivalent or it ships with no endpoints at
+    /// all. Only called when the route isn't trimmed — a trimmed route's cut ends are not
+    /// its real start/end.
+    private static func drawEndpoints(
+        _ route: RouteTrace, snapshot: MKMapSnapshotter.Snapshot, in context: CGContext
+    ) {
+        let points = route.segments.flatMap(\.points)
+        guard points.count > 1, let first = points.first, let last = points.last else { return }
+        let brand = UIColor(Color.brand)
+
+        let start = snapshot.point(for: CLLocationCoordinate2D(latitude: first.latitude, longitude: first.longitude))
+        let ringDiameter: CGFloat = 15
+        let ringRect = CGRect(
+            x: start.x - ringDiameter / 2, y: start.y - ringDiameter / 2,
+            width: ringDiameter, height: ringDiameter
+        )
+        context.saveGState()
+        context.setShadow(offset: CGSize(width: 0, height: 1), blur: 1.5, color: UIColor.black.withAlphaComponent(0.3).cgColor)
+        UIColor.white.setFill()
+        UIBezierPath(ovalIn: ringRect).fill()
+        context.restoreGState()
+        let ring = UIBezierPath(ovalIn: ringRect.insetBy(dx: 2, dy: 2))
+        ring.lineWidth = 4
+        brand.setStroke()
+        ring.stroke()
+
+        let end = snapshot.point(for: CLLocationCoordinate2D(latitude: last.latitude, longitude: last.longitude))
+        if let pin = UIImage(systemName: "mappin.circle.fill")?
+            .applyingSymbolConfiguration(.init(pointSize: 26, weight: .regular))?
+            .withTintColor(brand, renderingMode: .alwaysOriginal) {
+            let pinRect = CGRect(
+                x: end.x - pin.size.width / 2, y: end.y - pin.size.height,
+                width: pin.size.width, height: pin.size.height
+            )
+            context.saveGState()
+            context.setShadow(offset: CGSize(width: 0, height: 1), blur: 2, color: UIColor.black.withAlphaComponent(0.3).cgColor)
+            UIColor.white.setFill()
+            UIBezierPath(ovalIn: pinRect.insetBy(dx: -3, dy: -3)).fill()
+            context.restoreGState()
+            pin.draw(in: pinRect)
         }
     }
 

@@ -28,6 +28,9 @@ final class LiveTripController {
         let enteredAt: Date
         /// The unit's short code (TR plate number) — only set for the top tier.
         let code: String?
+        /// Average speed for the leg that ended here — from the previous passed place
+        /// (or the trip's first fix, for the first one) to this one.
+        let legSpeedKmh: Double?
     }
 
     private(set) var isRunning = false
@@ -44,6 +47,10 @@ final class LiveTripController {
     private(set) var startedAt: Date?
     /// The most recent coordinate — the active-trip map centres on it.
     private(set) var currentCoordinate: Coordinate?
+    /// Instantaneous speed from the last fix that reported one. `CLLocation.speed` is
+    /// -1 when unknown (a fresh GPS lock, poor signal) — kept at its last good value
+    /// rather than flickering to "no speed" for one bad fix.
+    private(set) var currentSpeedKmh: Double?
     /// Plate number of the province you're currently in — shown on the direction
     /// panel even when the headline is a district (spec: Turkish `il` sign).
     private(set) var currentProvinceCode: String?
@@ -63,6 +70,9 @@ final class LiveTripController {
     /// are simulated seconds, so wall-clock start/end would read as "0 min").
     private var firstFixAt: Date?
     private var lastFixAt: Date?
+    /// Coordinate + time of the previous passed place (or the trip's first fix) — the
+    /// baseline each new `PassedPlace.legSpeedKmh` measures from.
+    private var legOrigin: (coordinate: Coordinate, at: Date)?
 
     init(env: AppEnvironment, permissions: PermissionsModel) {
         self.env = env
@@ -82,8 +92,10 @@ final class LiveTripController {
         distanceMeters = 0
         lastFix = nil
         currentCoordinate = nil
+        currentSpeedKmh = nil
         currentProvinceCode = nil
         lastProvinceRef = nil
+        legOrigin = nil
         firstFixAt = nil
         lastFixAt = nil
         fixCount = 0
@@ -177,9 +189,11 @@ final class LiveTripController {
         guard let engine else { return }
 
         if firstFixAt == nil { firstFixAt = sample.timestamp }
+        if legOrigin == nil { legOrigin = (sample.coordinate, sample.timestamp) }
         lastFixAt = sample.timestamp
         fixCount += 1
         currentCoordinate = sample.coordinate
+        if sample.speed >= 0 { currentSpeedKmh = sample.speed * 3.6 }
 
         // Live "where am I" readout, independent of the confirm/dwell state machine.
         if let resolution = try? env.resolver.resolve(coordinate: sample.coordinate) {
@@ -227,10 +241,21 @@ final class LiveTripController {
         // add a duplicate row (the notification cooldown already suppresses the re-alert).
         if passedPlaces.first?.ref == event.place { return }
         guard let place = try? env.resolver.place(for: event.place, language: env.language) else { return }
+
+        var legSpeedKmh: Double?
+        if let legOrigin {
+            let seconds = event.enteredAt.timeIntervalSince(legOrigin.at)
+            if seconds > 0 {
+                legSpeedKmh = Haversine.distance(legOrigin.coordinate, event.coordinate) / seconds * 3.6
+            }
+        }
+        legOrigin = (event.coordinate, event.enteredAt)
+
         let passed = PassedPlace(
             id: event.id, ref: event.place, name: place.nameLocal,
             tierLabel: place.tierLabel, parentName: place.parentName,
-            population: place.population, enteredAt: event.enteredAt, code: place.code
+            population: place.population, enteredAt: event.enteredAt, code: place.code,
+            legSpeedKmh: legSpeedKmh
         )
         passedPlaces.insert(passed, at: 0)   // reverse chronological (spec §10)
         headline = place.nameLocal

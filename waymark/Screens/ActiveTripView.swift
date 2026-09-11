@@ -171,8 +171,16 @@ struct ActiveTripView: View {
             .frame(maxHeight: .infinity)
         } else {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                SignHeader("Places passed")
-                    .padding(.horizontal, Spacing.md)
+                HStack {
+                    SignHeader("Places passed")
+                    Spacer()
+                    if let currentSpeedKmh = live.currentSpeedKmh {
+                        Text(Format.speed(kmh: currentSpeedKmh))
+                            .font(.system(size: 12, weight: .bold)).monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.horizontal, Spacing.md)
                 List(live.passedPlaces) { passed in
                     Button {
                         path.append(.place(passed.ref))
@@ -194,6 +202,9 @@ struct ActiveTripView: View {
         if let parent = passed.parentName { parts.append(parent) }
         if let population = passed.population {
             parts.append("\(Format.population(population)) \(String(localized: "pop."))")
+        }
+        if let legSpeedKmh = passed.legSpeedKmh {
+            parts.append(Format.speed(kmh: legSpeedKmh))
         }
         return parts.isEmpty ? nil : parts.joined(separator: "  ·  ")
     }
