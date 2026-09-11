@@ -74,7 +74,7 @@ struct SharePreviewView: View {
     }
 
     private var preview: some View {
-        RouteSketch(route: trimmedRoute)
+        RouteMap(route: trimmedRoute)
             .frame(height: 300)
             .clipShape(.rect(cornerRadius: Radius.md))
             .overlay(alignment: .bottomLeading) { previewCaption }

@@ -16,7 +16,8 @@ struct waymarkApp: App {
         // Register App Intent dependencies here — `App.init()` runs on every
         // process launch, including the cold, headless launches a Shortcuts
         // automation triggers, before any intent can resolve `@Dependency`.
-        AppDependencyManager.shared.add(dependency: TripController.shared)
+        let tripController = TripController.shared
+        AppDependencyManager.shared.add(dependency: tripController)
         NotificationRouter.shared.register()
     }
 

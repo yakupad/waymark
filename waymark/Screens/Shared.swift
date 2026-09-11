@@ -94,7 +94,7 @@ struct RouteMap: View {
         }
     }
 
-    private struct Coord: Equatable {
+    private nonisolated struct Coord: Equatable {
         let lat: Double, lon: Double
         init(_ c: Coordinate) { lat = c.latitude; lon = c.longitude }
     }
@@ -154,41 +154,6 @@ struct JourneyGlyph: View {
 /// A map-free polyline sketch. `ImageRenderer` renders `Map` as blank tiles (spec 7.7),
 /// so the shareable image draws the route with `Canvas` instead. The real
 /// `MKMapSnapshotter` render is F7 (P9).
-struct RouteSketch: View {
-    let route: RouteTrace
-
-    var body: some View {
-        Canvas { context, size in
-            let points = route.segments.flatMap(\.points)
-            guard points.count > 1 else { return }
-            let lons = points.map(\.longitude)
-            let lats = points.map(\.latitude)
-            let centreLon = (lons.min()! + lons.max()!) / 2
-            let centreLat = (lats.min()! + lats.max()!) / 2
-            // uniform scale (keeps aspect); minimum span so a dead-straight route still fills.
-            let span = max(lons.max()! - lons.min()!, lats.max()! - lats.min()!, 0.002)
-            let inset: CGFloat = 10
-            let scale = (min(size.width, size.height) - inset * 2) / CGFloat(span)
-
-            func project(_ c: Coordinate) -> CGPoint {
-                CGPoint(
-                    x: size.width / 2 + CGFloat(c.longitude - centreLon) * scale,
-                    y: size.height / 2 - CGFloat(c.latitude - centreLat) * scale
-                )
-            }
-
-            for segment in route.segments where segment.points.count > 1 {
-                let path = Path { $0.addLines(segment.points.map(project)) }
-                context.stroke(path, with: .color(.white),
-                               style: .init(lineWidth: 6, lineCap: .round, lineJoin: .round))
-                context.stroke(path, with: .color(.signBlue),
-                               style: .init(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
-            }
-        }
-        .background(Color.signBlue.opacity(0.08))
-    }
-}
-
 /// Thin wrapper so existing call sites keep working; styled as a sign figure.
 struct StatTile: View {
     let value: String

@@ -48,7 +48,13 @@ enum ShareImageRenderer {
             return nil
         }
 
-        let renderer = UIGraphicsImageRenderer(size: size)
+        // Match the renderer's scale to the snapshotter's. `UIGraphicsImageRenderer(size:)`
+        // otherwise defaults to the device's screen scale (2x/3x), which draws the flat
+        // `scale=1` map bitmap into a larger canvas than its own pixel data — the base
+        // map comes out visibly blurry under the crisp vector route/text on top.
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
         return renderer.image { context in
             snapshot.image.draw(at: .zero)
             drawRoute(route, snapshot: snapshot, in: context.cgContext)

@@ -105,8 +105,14 @@ final class AppModel {
         let title = Trip.autoTitle(from: events) { [env] ref in
             try? env.resolver.place(for: ref, language: env.language)?.nameLocal
         }
+        // Best real signal for when the trip actually ended: the last recorded route
+        // point, then the last confirmed place, then "now" — never `startedAt`, which
+        // would make `endedAt == startedAt` and the duration read "0 min" (spec R4).
+        let endedAt = record.route?.segments.last?.endedAt
+            ?? events.map(\.enteredAt).max()
+            ?? Date()
         try? env.tripStore.finishTrip(
-            record, at: record.startedAt, events: events, route: record.route,
+            record, at: endedAt, events: events, route: record.route,
             distanceMeters: record.distanceMeters, title: title
         )
         self.recoveredTrip = nil
