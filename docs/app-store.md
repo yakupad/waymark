@@ -59,7 +59,7 @@ FULLY OFFLINE
 Boundary detection, place data and history all work with no signal. Waymark is most useful exactly where the network isn't: mountain passes, empty highways, the long gap between two cities. Nothing to download mid-trip.
 
 YOUR LOCATION STAYS ON YOUR DEVICE
-No account. No sign-up. No server. No third-party location or analytics SDK. Your location is used only on your iPhone to figure out which administrative area you're in, and it is never uploaded — there is nowhere for it to go.
+No account. No sign-up. No third-party location SDK. Your location is used only on your iPhone to figure out which administrative area you're in, and it is never uploaded.
 
 NOTIFICATION-LIGHT BY DESIGN
 By default you get a handful of alerts per trip — roughly one per province — not forty. If you want more detail, switch the sensitivity to districts or towns in Settings. Quiet hours and a per-place cooldown keep it from ever nagging.
@@ -84,7 +84,7 @@ TAMAMEN ÇEVRİMDIŞI
 Sınır tespiti, yer verileri ve geçmiş; hepsi şebeke olmadan çalışır. Waymark tam da ağın olmadığı yerlerde en işe yarar olanıdır: dağ geçitleri, boş yollar, iki şehir arasındaki uzun boşluk. Yolculuk ortasında indirilecek bir şey yok.
 
 KONUMUNUZ CİHAZINIZDA KALIR
-Hesap yok. Kayıt yok. Sunucu yok. Üçüncü taraf konum veya analiz SDK'sı yok. Konumunuz yalnızca iPhone'unuzda, hangi idari bölgede olduğunuzu belirlemek için kullanılır ve asla yüklenmez — gidecek bir yeri yoktur.
+Hesap yok. Kayıt yok. Üçüncü taraf konum SDK'sı yok. Konumunuz yalnızca iPhone'unuzda, hangi idari bölgede olduğunuzu belirlemek için kullanılır ve asla yüklenmez.
 
 TASARIM GEREĞİ AZ BİLDİRİM
 Varsayılan olarak yolculuk başına birkaç bildirim alırsınız — kabaca il başına bir tane — kırk tane değil. Daha fazla ayrıntı isterseniz Ayarlar'dan hassasiyeti ilçe veya kasabaya alın. Sessiz saatler ve yer başına bekleme süresi, uygulamanın sizi hiç rahatsız etmemesini sağlar.
@@ -152,26 +152,37 @@ N/A — Waymark is not a turn-by-turn navigation app; leave blank.
 
 ## 3. App Privacy (nutrition label — App Store Connect › App Privacy)
 
-Answer: **"No, we do not collect data from this app."**
+**Updated 2026-09-11 — Firebase (Analytics, Crashlytics, Performance) was
+added. The old "Data Not Collected" answer below no longer applies; this
+section must be re-answered in App Store Connect before the next submission.**
 
-Rationale, matching `waymark/Resources/PrivacyInfo.xcprivacy`:
-- `NSPrivacyTracking` = false, no tracking domains.
-- `NSPrivacyCollectedDataTypes` = empty. Location is processed on-device only and
-  never leaves it; trip history is stored only in the app's local SwiftData store;
-  motion activity (opt-in "Remind me to start a trip") is read on-device only.
-  Under Apple's definition none of this is "collection".
-- `NSPrivacyAccessedAPITypes`: `NSPrivacyAccessedAPICategoryUserDefaults`, reason
-  `CA92.1` (app's own settings). CoreMotion activity is permission-gated, not a
-  Required-Reason API, so it needs no manifest entry.
+Location, trip history and motion activity are still 100% on-device — none of
+that is collected, matching `waymark/Resources/PrivacyInfo.xcprivacy`
+(`NSPrivacyTracking` = false, no tracking domains, `NSPrivacyCollectedDataTypes`
+empty for the app's own code). Firebase, however, does collect data on our
+behalf. In App Store Connect › App Privacy, declare:
+
+- **Crash Data** — collected (Crashlytics), not linked to identity, not used
+  for tracking.
+- **Performance Data** — collected (Performance Monitoring), not linked to
+  identity, not used for tracking.
+- **Product Interaction / Usage Data** — collected (Analytics), not linked to
+  identity, not used for tracking.
+- **Identifiers**: none of the above are linked to the user's identity — they
+  ride on a random, per-install Firebase Installation ID, not the Apple ID,
+  email, or name. `IS_ADS_ENABLED = false` and no `AdSupport`/IDFA code is
+  linked, so **no App Tracking Transparency prompt is needed** and "Used for
+  Tracking" should be answered No for every data type.
 
 Permission strings needed (all in `InfoPlist.xcstrings`, en + tr):
 `NSLocationWhenInUseUsageDescription`,
 `NSLocationAlwaysAndWhenInUseUsageDescription`, `NSMotionUsageDescription`.
 
-If App Review pushes back on "not collected" because of the `location`
-background mode, the honest answer is still *Data Not Collected* — cite the
-review notes in §5 and the privacy manifest. Location that never leaves the
-device is not collected data.
+If App Review pushes back on the `location` background mode, the location
+argument still holds independently of the Firebase change: it never leaves
+the device, so it is not collected data — cite the review notes in §5 and the
+privacy manifest. See `docs/privacy.md` for the full public-facing wording on
+what Firebase collects and why.
 
 ---
 
@@ -235,9 +246,11 @@ heartbeat so a trip is never silently dropped when the vehicle is stationary.
 
 NO NETWORK FOR THE CORE LOOP
 All boundary detection and place content comes from an embedded SQLite pack
-(tr.pack, ~8 MB) built from OpenStreetMap + Wikidata + Wikipedia. The only
-network call in the app is MKMapSnapshotter, used to render the optional
-shareable trip image. There is no server, account, or analytics.
+(tr.pack, ~8 MB) built from OpenStreetMap + Wikidata + Wikipedia — this works
+fully offline with no network call at all. Separately, the app uses Firebase
+(Crashlytics, Performance, Analytics) and MKMapSnapshotter (for the optional
+shareable trip image); see the App Privacy section and privacy policy for
+details. There is no user account or server of our own.
 
 LIVE ACTIVITY
 Starts when the user taps "Start a trip"; ends when they tap "End" or the trip
@@ -314,7 +327,7 @@ on the brand-blue gradient.
 - [ ] `ITSAppUsesNonExemptEncryption = NO` in the app Info.plist
 - [ ] Support URL + Privacy Policy URL live and reachable
 - [ ] Screenshots uploaded for `en` and `tr`
-- [ ] App Privacy answered ("Data Not Collected")
+- [ ] App Privacy answered per §3 (Crash/Performance/Usage Data, not linked, not tracking)
 - [ ] Review notes pasted (§5)
 - [ ] Age rating questionnaire = all "None" → 4+
 - [ ] Export-compliance answered

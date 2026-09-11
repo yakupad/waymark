@@ -5,11 +5,14 @@
 
 import SwiftUI
 import AppIntents
+import FirebaseCore
 
 @main
 struct waymarkApp: App {
 
     init() {
+        FirebaseApp.configure()
+
         // Register App Intent dependencies here — `App.init()` runs on every
         // process launch, including the cold, headless launches a Shortcuts
         // automation triggers, before any intent can resolve `@Dependency`.

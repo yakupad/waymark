@@ -937,9 +937,17 @@ değildir — en fazla yerel bildirim veya (kullanıcının kurduğu) sessiz App
 ### Gizlilik
 
 - `PrivacyInfo.xcprivacy` dosyası zorunludur.
-- `NSPrivacyCollectedDataTypes`: **boş** — hiçbir veri toplanmıyor.
 - `NSPrivacyAccessedAPITypes`: `UserDefaults` (sebep kodu `CA92.1`).
-- Analitik eklenirse: yalnızca olay sayacı, asla koordinat.
+- **Firebase entegre edildi** (2026-09-11): Crashlytics + Performance + Analytics
+  (`GoogleService-Info.plist`, bundle `tr.com.yakupad.waymark`, proje
+  `waymark-82953`, SPM `firebase-ios-sdk @ 12.19.1`, `FirebaseApp.configure()`
+  `waymarkApp.init()`'te). Konum/rota/yolculuk verisi **hiçbir zaman** Firebase'e
+  gitmez — yalnızca çökme raporu, performans metriği ve isimsiz kullanım
+  olayları, Firebase'in ürettiği rastgele cihaz kimliğiyle ilişkilendirilir.
+  App Tracking Transparency gerektirmez (IDFA toplanmıyor, `IS_ADS_ENABLED=false`).
+  `docs/privacy.md` (EN+TR) güncellendi. **Yapılacak:** App Store Connect → App
+  Privacy nutrition label güncellenmeli (Crash Data, Performance Data, Usage
+  Data / Product Interaction — kimliğe bağlı değil, izleme için kullanılmıyor).
 
 ---
 
