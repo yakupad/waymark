@@ -1287,8 +1287,19 @@ ve Release derleniyor.
   **`docs/privacy-policy.md`** + **`docs/support.md`** (en+tr, host'lanabilir);
   `docs/app-store/screenshots/` — en 3 çerçeveli + tr 1 (Türkçe UI) + ham kareler,
   `tools/appstore/frame.swift`.
-- **Bilinen F1 veri hatası:** yerleşim `parent_id` çoğu zaman yanlış (geniş alandaki
-  köyler aynı ilçeyi gösteriyor). Bir sonraki pack üretiminde düzeltilecek.
+- ~~**Bilinen F1 veri hatası:** yerleşim `parent_id` çoğu zaman yanlış~~ — **DÜZELDİ**
+  (2026-09-11, ilk gerçek cihaz saha testinde bulundu — İstanbul/Sancaktepe'de
+  panel "Merve, Çumra, Konya" diyordu, ~500 km uzaktaki yanlış il). Kök neden:
+  `settlement.parent_id` sütunu F1 eşleştirmesinden geliyor, gerçek poligon
+  içerme değil — birden fazla alakasız yerleşim aynı yanlış `parent_id`'yi
+  paylaşıyordu (muhtemelen F1 eşleştirme adımının bir varsayılan/fallback değeri
+  — gerçek pipeline kökeni hâlâ bulunmadı). **Çözüm** çalışma zamanında, pack
+  yeniden üretilmeden: `SQLiteGeoResolver.settlementPlace` artık saklı
+  `parent_id`'ye güvenmiyor — `resolve(coordinate:)`'ın zaten kullandığı aynı
+  R*Tree + ray-cast poligon yürüyüşünü yerleşimin kendi `(lat, lon)`'unda
+  çalıştırıyor, sadece o hiçbir şey bulamazsa saklı değere düşüyor. Gerçek
+  `tr.pack` üzerinde doğrulandı (Merve → artık doğru "Sancaktepe"). GeoData
+  35→36 test, toplam 175.
 
 **Kalan F9 (gerçek cihaz / Apple hesabı):** cihazda pil ölçümü (saatte <%8, ekran
 kapalı), cihazda Live Activity + bildirim akışı, şebekesiz bölge davranışı, cihazda
