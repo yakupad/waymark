@@ -246,13 +246,13 @@ struct TripSummaryView: View {
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                                 .frame(width: 50, alignment: .leading)
+                            if let legSpeedKmh = entry.legSpeedKmh {
+                                SpeedBadge(kmh: legSpeedKmh)
+                            }
                             Text(entry.name).font(.system(size: 15, weight: .heavy))
                                 .foregroundStyle(.primary)
                                 .lineLimit(1)
                             Spacer()
-                            if let legSpeedKmh = entry.legSpeedKmh {
-                                SpeedBadge(kmh: legSpeedKmh)
-                            }
                             TierShield(entry.tierLabel)
                         }
                     }

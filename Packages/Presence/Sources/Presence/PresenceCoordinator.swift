@@ -104,7 +104,10 @@ public actor PresenceCoordinator: PresencePresenting {
         record(event, place: place)
 
         if routing.updatesLiveActivity, activityRunning {
-            if coalescer.enqueue(event, now: now) != nil {
+            // A district or province crossing is significant enough that it shouldn't
+            // sit out the settlement-level coalescing window — force it through.
+            let isDistrictOrCoarser = event.place.tier != nil
+            if coalescer.enqueue(event, now: now, forceFlush: isDistrictOrCoarser) != nil {
                 await activity.update(makeState())
             }
         }

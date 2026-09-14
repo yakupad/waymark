@@ -31,9 +31,12 @@ public struct UpdateCoalescer: Sendable {
 
     /// Enqueue an event. Returns the batch to push to the Live Activity now, or `nil`
     /// if it should be held. The first event of a trip flushes immediately.
-    public mutating func enqueue(_ event: PlaceEvent, now: Date) -> [PlaceEvent]? {
+    /// `forceFlush` skips the window entirely — a district/province crossing is
+    /// significant enough that the user shouldn't wait out the settlement-level
+    /// coalescing window to see it (spec 8.2 still applies to finer events).
+    public mutating func enqueue(_ event: PlaceEvent, now: Date, forceFlush: Bool = false) -> [PlaceEvent]? {
         pending.append(event)
-        if let lastFlush, now.timeIntervalSince(lastFlush) < interval {
+        if !forceFlush, let lastFlush, now.timeIntervalSince(lastFlush) < interval {
             return nil
         }
         return flush(now: now)

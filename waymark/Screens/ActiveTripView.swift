@@ -171,25 +171,21 @@ struct ActiveTripView: View {
             .frame(maxHeight: .infinity)
         } else {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                HStack {
-                    SignHeader("Places passed")
-                    Spacer()
-                    if let currentSpeedKmh = live.currentSpeedKmh {
-                        SpeedBadge(kmh: currentSpeedKmh)
-                    }
-                }
-                .padding(.horizontal, Spacing.md)
+                SignHeader("Places passed")
+                    .padding(.horizontal, Spacing.md)
                 List(live.passedPlaces) { passed in
                     Button {
                         path.append(.place(passed.ref))
                     } label: {
-                        MilestoneRow(title: passed.name, subtitle: passedDetail(passed)) {
-                            HStack(spacing: Spacing.xs) {
+                        MilestoneRow(
+                            title: passed.name, subtitle: passedDetail(passed),
+                            leading: {
                                 if let legSpeedKmh = passed.legSpeedKmh {
                                     SpeedBadge(kmh: legSpeedKmh)
                                 }
-                                TierShield(passed.tierLabel)
                             }
+                        ) {
+                            TierShield(passed.tierLabel)
                         }
                     }
                     .buttonStyle(.plain)

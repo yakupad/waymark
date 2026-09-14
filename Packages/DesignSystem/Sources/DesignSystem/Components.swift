@@ -239,18 +239,25 @@ public struct SignStat: View {
 
 /// A list row for a passed place or a stored trip — a leading chevron like the
 /// ones stencilled on a kerbstone, then the name, then trailing detail.
-public struct MilestoneRow<Trailing: View>: View {
+public struct MilestoneRow<Leading: View, Trailing: View>: View {
     private let title: String
     private let subtitle: String?
+    private let leading: Leading
     private let trailing: Trailing
 
+    /// `trailing` stays the LAST closure parameter, so the existing unlabelled-trailing-
+    /// closure call sites (`MilestoneRow(title:subtitle:) { … }`) keep binding to it
+    /// unchanged (Swift's trailing-closure sugar always targets the last eligible
+    /// parameter). Pass `leading:` as a normal labelled argument when you need it.
     public init(
         title: String,
         subtitle: String? = nil,
+        @ViewBuilder leading: () -> Leading = { EmptyView() },
         @ViewBuilder trailing: () -> Trailing = { EmptyView() }
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.leading = leading()
         self.trailing = trailing()
     }
 
@@ -259,6 +266,7 @@ public struct MilestoneRow<Trailing: View>: View {
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .black))
                 .foregroundStyle(Color.signBlue)
+            leading
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 16, weight: .heavy))

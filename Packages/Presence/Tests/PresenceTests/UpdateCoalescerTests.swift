@@ -44,6 +44,15 @@ struct UpdateCoalescerTests {
         #expect(batch?.count == 2)
     }
 
+    @Test func `forceFlush bypasses the window, merging whatever was already held`() {
+        var c = UpdateCoalescer(interval: 60)
+        _ = c.enqueue(event(adminRef(1, 1)), now: t0)
+        _ = c.enqueue(event(settlementRef(2)), now: t0.addingTimeInterval(10))
+        let batch = c.enqueue(event(adminRef(3, 2)), now: t0.addingTimeInterval(20), forceFlush: true)
+        #expect(batch?.count == 2)   // the held settlement event + this district one
+        #expect(!c.hasPending)
+    }
+
     @Test func `drain force-flushes everything`() {
         var c = UpdateCoalescer(interval: 60)
         _ = c.enqueue(event(adminRef(1, 1)), now: t0)

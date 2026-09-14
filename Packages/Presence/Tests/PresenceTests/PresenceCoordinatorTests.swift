@@ -114,19 +114,33 @@ struct PresenceCoordinatorTests {
         #expect(await notifications.posted.count == 2)
     }
 
-    @Test func `Updates inside the 60 s window are coalesced`() async {
+    @Test func `Settlement updates inside the 60 s window are coalesced`() async {
         let (coord, _, activity, _, clock) = fixture(sensitivity: .settlement)
         await coord.startActivity(for: makeTrip())
 
         await coord.update(with: event(adminRef(1, 1), at: 0))     // flush #1
         clock.advance(by: 20)
-        await coord.update(with: event(adminRef(2, 3), at: 20))    // held
+        await coord.update(with: event(settlementRef(5), at: 20))  // held
         clock.advance(by: 20)
         await coord.update(with: event(settlementRef(7), at: 40))  // held
         #expect(await activity.updates.count == 1)
 
         clock.advance(by: 30)                                       // t0 + 70
         await coord.flushPendingActivityUpdate()
+        #expect(await activity.updates.count == 2)
+    }
+
+    @Test func `A district/province event bypasses the coalescing window`() async {
+        let (coord, _, activity, _, clock) = fixture(sensitivity: .settlement)
+        await coord.startActivity(for: makeTrip())
+
+        await coord.update(with: event(adminRef(1, 1), at: 0))     // flush #1
+        clock.advance(by: 10)
+        await coord.update(with: event(settlementRef(5), at: 10))  // held
+        clock.advance(by: 10)
+        // A district crossing well inside the 60 s window still pushes right away,
+        // taking the held settlement event with it.
+        await coord.update(with: event(adminRef(2, 3), at: 20))
         #expect(await activity.updates.count == 2)
     }
 

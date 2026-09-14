@@ -47,10 +47,6 @@ final class LiveTripController {
     private(set) var startedAt: Date?
     /// The most recent coordinate — the active-trip map centres on it.
     private(set) var currentCoordinate: Coordinate?
-    /// Instantaneous speed from the last fix that reported one. `CLLocation.speed` is
-    /// -1 when unknown (a fresh GPS lock, poor signal) — kept at its last good value
-    /// rather than flickering to "no speed" for one bad fix.
-    private(set) var currentSpeedKmh: Double?
     /// Plate number of the province you're currently in — shown on the direction
     /// panel even when the headline is a district (spec: Turkish `il` sign).
     private(set) var currentProvinceCode: String?
@@ -92,7 +88,6 @@ final class LiveTripController {
         distanceMeters = 0
         lastFix = nil
         currentCoordinate = nil
-        currentSpeedKmh = nil
         currentProvinceCode = nil
         lastProvinceRef = nil
         legOrigin = nil
@@ -193,7 +188,6 @@ final class LiveTripController {
         lastFixAt = sample.timestamp
         fixCount += 1
         currentCoordinate = sample.coordinate
-        if sample.speed >= 0 { currentSpeedKmh = sample.speed * 3.6 }
 
         // Live "where am I" readout, independent of the confirm/dwell state machine.
         if let resolution = try? env.resolver.resolve(coordinate: sample.coordinate) {
